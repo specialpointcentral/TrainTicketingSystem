@@ -3,10 +3,11 @@ package ticketingsystem;
 public class Test {
 
     public static void main(String[] args) throws InterruptedException {
-        
-    final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, threadnum);
-
-    //ToDo
-        
+        RandomTest rtest = new RandomTest();
+        try {
+            rtest.beginTest();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
