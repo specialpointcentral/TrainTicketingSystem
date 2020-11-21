@@ -94,3 +94,6 @@ final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum,
 3. `trace.sh`是trace生成脚本，用于正确性验证，不能更改。
 4. `TicketingDS.java`是并发数据结构的实现。
 5. `Test.java`实现多线程性能测试。
+    - `Test.java`为测试的主类
+    - `UnitTest.java`为系统的单元测试，为单线程运行
+    - `RandomTest.java`为系统的随机测试，通过多线程，随机购、退票完成
