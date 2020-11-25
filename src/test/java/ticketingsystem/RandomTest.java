@@ -1,6 +1,7 @@
 package ticketingsystem;
 
 import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RandomTest {
     int threadnum = 4;
@@ -62,16 +63,16 @@ public class RandomTest {
                                             + ticket.arrival + " " + ticket.seat);
                                     System.out.flush();
                                 } else {
-                                    System.out.println(preTime + " " + String.valueOf(System.nanoTime() - startTime)
+                                    System.err.println(preTime + " " + String.valueOf(System.nanoTime() - startTime)
                                             + " " + ThreadId.get() + " " + "ErrOfRefund");
-                                    System.out.flush();
+                                    fail("Err: cannot refund ticket");
                                     assert false : "Err: cannot refund ticket";
                                 }
                             } else {
                                 long preTime = System.nanoTime() - startTime;
-                                System.out.println(preTime + " " + String.valueOf(System.nanoTime() - startTime) + " "
+                                System.err.println(preTime + " " + String.valueOf(System.nanoTime() - startTime) + " "
                                         + ThreadId.get() + " " + "ErrOfRefund");
-                                System.out.flush();
+                                assertNotEquals(ticket, null, "Err: soldTicket out of bounds");
                                 assert false : "Err: soldTicket out of bounds";
                             }
                         } else

@@ -1,6 +1,7 @@
 package ticketingsystem;
 
 import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * unit test This test is only run in single thread.
@@ -36,7 +37,7 @@ public class UnitTest {
     public boolean beginTest() throws InterruptedException {
         startTime = System.nanoTime();
         boolean result = true;
-        if(testBuyTicket()) {
+        if (testBuyTicket()) {
             System.out.println("Test BuyTicket Pass!");
             System.out.flush();
         } else {
@@ -44,7 +45,7 @@ public class UnitTest {
             result = false;
         }
 
-        if(testRefundTicket()) {
+        if (testRefundTicket()) {
             System.out.println("Test RefundTicket Pass!");
             System.out.flush();
         } else {
@@ -52,7 +53,7 @@ public class UnitTest {
             result = false;
         }
 
-        if(testInquiryTicket()) {
+        if (testInquiryTicket()) {
             System.out.println("Test InquiryTicket Pass!");
             System.out.flush();
         } else {
@@ -70,14 +71,15 @@ public class UnitTest {
         int arrival = stationnum;
         int beginTickets = tds.inquiry(route, departure, arrival);
         long preTime = System.nanoTime() - startTime;
-        if(beginTickets != seatnum * coachnum) {
+        if (beginTickets != seatnum * coachnum) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test0: beginTickets=" 
-                                + beginTickets + ".");
+            System.err.println(
+                    preTime + " " + postTime + " " + "testBuyTicket Test0: beginTickets=" + beginTickets + ".");
+            fail("Err: Inquiry wrong seats!");
             assert false : "Err: Inquiry wrong seats!";
             return false;
         }
-        
+
         /**
          * 1. Test only buy a ticket
          */
@@ -88,19 +90,19 @@ public class UnitTest {
         departure = rand.nextInt(stationnum - 2) + 2; // 1 to 2 is reverse
         arrival = departure + rand.nextInt(stationnum - departure) + 1;
         Ticket ticket = tds.buyTicket(passenger, route, departure, arrival);
-        if(ticket == null) {
+        if (ticket == null) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testBuyTicket Test1: Cannot buy a ticket!");
+            System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test1: Cannot buy a ticket!");
+            fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
             return false;
         }
         int remainTickets = tds.inquiry(route, departure, arrival);
-        if(remainTickets != (beginTickets - 1)) {
+        if (remainTickets != (beginTickets - 1)) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testBuyTicket Test1: Return error ticket number "
-                                + remainTickets +".");
+            System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test1: Return error ticket number "
+                    + remainTickets + ".");
+            fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
             return false;
         }
@@ -109,50 +111,51 @@ public class UnitTest {
          */
         preTime = System.nanoTime() - startTime;
         // first we need buy all tickets - 1
-        for(int i = 0; i < remainTickets; ++i) {
-            if((ticket = tds.buyTicket(passenger, route, 1, stationnum )) == null) {
+        for (int i = 0; i < remainTickets; ++i) {
+            if ((ticket = tds.buyTicket(passenger, route, 1, stationnum)) == null) {
                 long postTime = System.nanoTime() - startTime;
-                System.err.println(preTime + " " + postTime + " " 
-                                    + "testBuyTicket Test2.1: Cannot buy a ticket in turn "
-                                    + i +".");
+                System.err.println(preTime + " " + postTime + " "
+                        + "testBuyTicket Test2.1: Cannot buy a ticket in turn " + i + ".");
+                fail("Err: Cannot buy a ticket!");
                 assert false : "Err: Cannot buy a ticket!";
                 return false;
             }
         }
         // second we find what we can buy
         remainTickets = tds.inquiry(route, 1, stationnum);
-        if(remainTickets != 0) {
+        if (remainTickets != 0) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testBuyTicket Test2.2: Return error ticket number "
-                                + remainTickets +".");
+            System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test2.2: Return error ticket number "
+                    + remainTickets + ".");
+            fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
             return false;
         }
         // third, we try to buy 1 to 2, 1 tickets remain
-        if((ticket = tds.buyTicket(passenger, route, 1, 2)) == null) {
+        if ((ticket = tds.buyTicket(passenger, route, 1, 2)) == null) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testBuyTicket Test2.3: Cannot buy a ticket!");
+            System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test2.3: Cannot buy a ticket!");
+            fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
             return false;
         }
         remainTickets = tds.inquiry(route, 1, 2);
-        if(remainTickets != 0) {
+        if (remainTickets != 0) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testBuyTicket Test2.3: Return error ticket number "
-                                + remainTickets +".");
+            System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test2.3: Return error ticket number "
+                    + remainTickets + ".");
+            fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
             return false;
         }
         /**
          * 3. Test overbound situation
          */
-        if((ticket = tds.buyTicket(passenger, route, 1, 2)) != null) {
+        if ((ticket = tds.buyTicket(passenger, route, 1, 2)) != null) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testBuyTicket Test3: Can buy a ticket when 0 ticket remain???");
+            System.err.println(
+                    preTime + " " + postTime + " " + "testBuyTicket Test3: Can buy a ticket when 0 ticket remain???");
+            fail("Err: Can buy a ticket when 0 ticket remain!");
             assert false : "Err: Can buy a ticket when 0 ticket remain!";
             return false;
         }
@@ -166,10 +169,11 @@ public class UnitTest {
         int arrival = stationnum;
         int beginTickets = tds.inquiry(route, departure, arrival);
         long preTime = System.nanoTime() - startTime;
-        if(beginTickets != seatnum * coachnum) {
+        if (beginTickets != seatnum * coachnum) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test0: beginTickets=" 
-                                + beginTickets + ".");
+            System.err.println(
+                    preTime + " " + postTime + " " + "testRefundTicket Test0: beginTickets=" + beginTickets + ".");
+            fail("Err: Inquiry wrong seats!");
             assert false : "Err: Inquiry wrong seats!";
             return false;
         }
@@ -182,40 +186,40 @@ public class UnitTest {
          */
         preTime = System.nanoTime() - startTime;
         String passenger = passengerName();
-        
+
         Ticket ticket = tds.buyTicket(passenger, route, departure, arrival);
-        if(ticket == null || !tds.refundTicket(ticket)) {
+        if (ticket == null || !tds.refundTicket(ticket)) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testRefundTicket Test1: Cannot buy/refund a ticket!");
+            System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test1: Cannot buy/refund a ticket!");
+            fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
             return false;
         }
         int remainTickets = tds.inquiry(route, departure, arrival);
-        if(remainTickets != beginTickets) {
+        if (remainTickets != beginTickets) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testRefundTicket Test1: Return error ticket number "
-                                + remainTickets +".");
+            System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test1: Return error ticket number "
+                    + remainTickets + ".");
+            fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
             return false;
         }
         /**
          * 2. Test refund a ticket with wrong ticket info
          */
-        if(tds.refundTicket(ticket)) {
+        if (tds.refundTicket(ticket)) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testRefundTicket Test2: Cannot refund a ticket!");
+            System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test2: Cannot refund a ticket!");
+            fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
             return false;
         }
         remainTickets = tds.inquiry(route, departure, arrival);
-        if(remainTickets != beginTickets) {
+        if (remainTickets != beginTickets) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " 
-                                + "testRefundTicket Test2: Return error ticket number "
-                                + remainTickets +".");
+            System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test2: Return error ticket number "
+                    + remainTickets + ".");
+            fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
             return false;
         }
@@ -232,10 +236,11 @@ public class UnitTest {
         String passenger = passengerName();
         Random rand = new Random(System.currentTimeMillis());
 
-        if(beginTickets != seatnum * coachnum) {
+        if (beginTickets != seatnum * coachnum) {
             long postTime = System.nanoTime() - startTime;
-            System.err.println(preTime + " " + postTime + " " + "testInquiryTicket Test0: beginTickets=" 
-                                + beginTickets + ".");
+            System.err.println(
+                    preTime + " " + postTime + " " + "testInquiryTicket Test0: beginTickets=" + beginTickets + ".");
+            fail("Err: Inquiry wrong seats!");
             assert false : "Err: Inquiry wrong seats!";
             return false;
         }
@@ -243,13 +248,13 @@ public class UnitTest {
          * 1. Test inquiry by sold some tickets
          */
         preTime = System.nanoTime() - startTime;
-        for(int i = 1; i < beginTickets / 2; ++i) {
-            if(tds.buyTicket(passenger, route, departure, arrival) == null || 
-                tds.inquiry(route, departure, arrival) != beginTickets - i) {
+        for (int i = 1; i < beginTickets / 2; ++i) {
+            if (tds.buyTicket(passenger, route, departure, arrival) == null
+                    || tds.inquiry(route, departure, arrival) != beginTickets - i) {
                 long postTime = System.nanoTime() - startTime;
-                System.err.println(preTime + " " + postTime + " " 
-                                    + "testInquiryTicket Test1: beginTickets=" 
-                                    + beginTickets + ".");
+                System.err.println(
+                        preTime + " " + postTime + " " + "testInquiryTicket Test1: beginTickets=" + beginTickets + ".");
+                fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
                 return false;
             }
@@ -263,27 +268,26 @@ public class UnitTest {
         preTime = System.nanoTime() - startTime;
         ArrayList<Ticket> tks = new ArrayList<Ticket>();
         Ticket tic = null;
-        for(int i = 1; i < buy; ++i) {
-            if((tic = tds.buyTicket(passenger, route, departure, arrival)) == null || 
-                tds.inquiry(route, departure, arrival) != beginTickets - i) {
+        for (int i = 1; i < buy; ++i) {
+            if ((tic = tds.buyTicket(passenger, route, departure, arrival)) == null
+                    || tds.inquiry(route, departure, arrival) != beginTickets - i) {
                 long postTime = System.nanoTime() - startTime;
-                System.err.println(preTime + " " + postTime + " " 
-                                    + "testInquiryTicket Test2: beginTickets=" 
-                                    + beginTickets + ".");
+                System.err.println(
+                        preTime + " " + postTime + " " + "testInquiryTicket Test2: beginTickets=" + beginTickets + ".");
+                fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
                 return false;
             }
             tks.add(tic);
         }
 
-        for(int i = 1; i < sell; ++i) {
+        for (int i = 1; i < sell; ++i) {
             tic = tks.get(rand.nextInt(tks.size()));
-            if(!tds.refundTicket(tic) || 
-                tds.inquiry(route, departure, arrival) != beginTickets - i) {
+            if (!tds.refundTicket(tic) || tds.inquiry(route, departure, arrival) != beginTickets - i) {
                 long postTime = System.nanoTime() - startTime;
-                System.err.println(preTime + " " + postTime + " " 
-                                    + "testInquiryTicket Test2: beginTickets=" 
-                                    + beginTickets + ".");
+                System.err.println(
+                        preTime + " " + postTime + " " + "testInquiryTicket Test2: beginTickets=" + beginTickets + ".");
+                fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
                 return false;
             }
