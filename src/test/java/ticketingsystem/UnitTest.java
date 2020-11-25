@@ -37,26 +37,26 @@ public class UnitTest {
         startTime = System.nanoTime();
         boolean result = true;
         if(testBuyTicket()) {
-            System.out.println("testBuyTicket Pass!");
+            System.out.println("Test BuyTicket Pass!");
             System.out.flush();
         } else {
-            System.err.println("testBuyTicket Failure!");
+            System.err.println("Test BuyTicket Failure!");
             result = false;
         }
 
         if(testRefundTicket()) {
-            System.out.println("testRefundTicket Pass!");
+            System.out.println("Test RefundTicket Pass!");
             System.out.flush();
         } else {
-            System.err.println("testRefundTicket Failure!");
+            System.err.println("Test RefundTicket Failure!");
             result = false;
         }
 
         if(testInquiryTicket()) {
-            System.out.println("testInquiryTicket Pass!");
+            System.out.println("Test InquiryTicket Pass!");
             System.out.flush();
         } else {
-            System.err.println("testInquiryTicket Failure!");
+            System.err.println("Test InquiryTicket Failure!");
             result = false;
         }
 

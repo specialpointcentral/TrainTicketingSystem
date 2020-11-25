@@ -1,57 +1,63 @@
 package ticketingsystem;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+class ThreadId {
+    // Atomic integer containing the next thread ID to be assigned
+    private static final AtomicInteger nextId = new AtomicInteger(0);
 
-public class RandomTest {
-    int threadnum = 4;
-    int routenum = 3; // route is designed from 1 to 3
-    int coachnum = 5; // coach is arranged from 1 to 5
-    int seatnum = 10; // seat is allocated from 1 to 20
-    int stationnum = 8; // station is designed from 1 to 5
+    // Thread local variable containing each thread's ID
+    private static final ThreadLocal<Integer> threadId = new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+            return nextId.getAndIncrement();
+        }
+    };
 
-    int testnum = 1000;
-    final static int RETPC = 30; // return ticket operation is 10% percent
-    final static int BUYPC = 60; // buy ticket operation is 30% percent
-    final static int INQPC = 100; // inquiry ticket operation is 60% percent
+    // Returns the current thread's unique ID, assigning it if necessary
+    public static int get() {
+        return threadId.get();
+    }
+}
 
-    private String passengerName() {
-        Random rand = new Random(System.currentTimeMillis());
+public class Trace {
+    final static int threadnum = 4;
+    final static int routenum = 3; // route is designed from 1 to 3
+    final static int coachnum = 5; // coach is arranged from 1 to 5
+    final static int seatnum = 10; // seat is allocated from 1 to 20
+    final static int stationnum = 8; // station is designed from 1 to 5
+
+    final static int testnum = 1000;
+    final static int retpc = 30; // return ticket operation is 10% percent
+    final static int buypc = 60; // buy ticket operation is 30% percent
+    final static int inqpc = 100; // inquiry ticket operation is 60% percent
+
+    static String passengerName() {
+        Random rand = new Random();
         long uid = rand.nextInt(testnum);
         return "passenger" + uid;
     }
 
-    public RandomTest() {
-        this(3, 5, 10, 8, 4, 1000);
-    }
+    public static void main(String[] args) throws InterruptedException {
 
-    public RandomTest(int routenum, int coachnum, int seatnum, int stationnum, int threadnum, int testnum) {
-        this.routenum = routenum;
-        this.coachnum = coachnum;
-        this.seatnum = seatnum;
-        this.stationnum = stationnum;
-        this.threadnum = threadnum;
-        this.testnum = testnum;
-    }
-
-    public void beginTest() throws InterruptedException {
+        Thread[] threads = new Thread[threadnum];
 
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, threadnum);
 
-        Thread[] threads = new Thread[threadnum];
         final long startTime = System.nanoTime();
-        
+
         for (int i = 0; i < threadnum; i++) {
             threads[i] = new Thread(new Runnable() {
                 public void run() {
-                    Random rand = new Random(System.currentTimeMillis());
+                    Random rand = new Random();
                     Ticket ticket = new Ticket();
                     ArrayList<Ticket> soldTicket = new ArrayList<Ticket>();
 
                     for (int i = 0; i < testnum; i++) {
-                        int sel = rand.nextInt(INQPC);
-                        // refund ticket
-                        if (0 <= sel && sel < RETPC && !soldTicket.isEmpty()) {
+                        int sel = rand.nextInt(inqpc);
+                        // return ticket
+                        if (0 <= sel && sel < retpc && soldTicket.size() > 0) {
                             int select = rand.nextInt(soldTicket.size());
                             if ((ticket = soldTicket.remove(select)) != null) {
                                 long preTime = System.nanoTime() - startTime;
@@ -66,18 +72,16 @@ public class RandomTest {
                                     System.out.println(preTime + " " + String.valueOf(System.nanoTime() - startTime)
                                             + " " + ThreadId.get() + " " + "ErrOfRefund");
                                     System.out.flush();
-                                    assert false : "Err: cannot refund ticket";
                                 }
                             } else {
                                 long preTime = System.nanoTime() - startTime;
                                 System.out.println(preTime + " " + String.valueOf(System.nanoTime() - startTime) + " "
                                         + ThreadId.get() + " " + "ErrOfRefund");
                                 System.out.flush();
-                                assert false : "Err: soldTicket out of bounds";
                             }
                         } else
                         // buy ticket
-                        if (RETPC <= sel && sel < BUYPC) {
+                        if (retpc <= sel && sel < buypc) {
                             String passenger = passengerName();
                             int route = rand.nextInt(routenum) + 1;
                             int departure = rand.nextInt(stationnum - 1) + 1;
@@ -101,7 +105,7 @@ public class RandomTest {
                             }
                         } else
                         // inquiry ticket
-                        if (BUYPC <= sel && sel < INQPC) {
+                        if (buypc <= sel && sel < inqpc) {
 
                             int route = rand.nextInt(routenum) + 1;
                             int departure = rand.nextInt(stationnum - 1) + 1;
@@ -114,8 +118,10 @@ public class RandomTest {
                             System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " " + "RemainTicket"
                                     + " " + leftTicket + " " + route + " " + departure + " " + arrival);
                             System.out.flush();
+
                         }
                     }
+
                 }
             });
             threads[i].start();

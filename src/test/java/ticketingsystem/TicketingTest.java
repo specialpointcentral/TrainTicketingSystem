@@ -1,8 +1,12 @@
 package ticketingsystem;
 
-public class Test {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
-    public static void main(String[] args) throws InterruptedException {
+public class TicketingTest {
+
+    @Test
+    public void mainTest() throws InterruptedException {
         System.out.println("===== Begin Unit Test =====");
         System.out.flush();
         UnitTest utest = new UnitTest();
