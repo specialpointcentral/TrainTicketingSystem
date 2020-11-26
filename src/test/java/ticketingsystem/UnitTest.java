@@ -262,6 +262,7 @@ public class UnitTest {
         /**
          * 2. Test inquiry by sold/refunded some tickets
          */
+        beginTickets = tds.inquiry(route, departure, arrival);
         int sell = rand.nextInt(beginTickets / 2 - 2) + 1;
         int buy = rand.nextInt(beginTickets / 2 - 2) + 1;
         sell = Math.max(sell, buy);
