@@ -2,69 +2,27 @@ package ticketingsystem;
 
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * unit test This test is only run in single thread.
  */
 public class UnitTest {
-    int routenum = 3; // route is designed from 1 to 3
-    int coachnum = 5; // coach is arranged from 1 to 5
-    int seatnum = 10; // seat is allocated from 1 to 20
-    int stationnum = 8; // station is designed from 1 to 5
-
-    int testnum = 1000;
-
+    int routenum = 3;           // route is designed from 1 to 3
+    int coachnum = 5;           // coach is arranged from 1 to 5
+    int seatnum = 10;           // seat is allocated from 1 to 20
+    int stationnum = 8;         // station is designed from 1 to 5
     long startTime;
-
+    
     private String passengerName() {
         Random rand = new Random(System.currentTimeMillis());
-        long uid = rand.nextInt(testnum);
+        long uid = rand.nextInt();
         return "passenger" + uid;
     }
-
-    public UnitTest() {
-        this(3, 5, 10, 8, 1000);
-    }
-
-    public UnitTest(int routenum, int coachnum, int seatnum, int stationnum, int testnum) {
-        this.routenum = Math.max(routenum, 3);
-        this.coachnum = Math.max(coachnum, 2);
-        this.seatnum = Math.max(seatnum, 5);
-        this.stationnum = stationnum;
-        this.testnum = testnum;
-    }
-
-    public boolean beginTest() throws InterruptedException {
+    
+    @Test
+    void testBuyTicket() throws InterruptedException {
         startTime = System.nanoTime();
-        boolean result = true;
-        if (testBuyTicket()) {
-            System.out.println("Test BuyTicket Pass!");
-            System.out.flush();
-        } else {
-            System.err.println("Test BuyTicket Failure!");
-            result = false;
-        }
-
-        if (testRefundTicket()) {
-            System.out.println("Test RefundTicket Pass!");
-            System.out.flush();
-        } else {
-            System.err.println("Test RefundTicket Failure!");
-            result = false;
-        }
-
-        if (testInquiryTicket()) {
-            System.out.println("Test InquiryTicket Pass!");
-            System.out.flush();
-        } else {
-            System.err.println("Test InquiryTicket Failure!");
-            result = false;
-        }
-
-        return result;
-    }
-
-    private boolean testBuyTicket() throws InterruptedException {
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, 1);
         int route = routenum;
         int departure = 1;
@@ -77,7 +35,6 @@ public class UnitTest {
                     preTime + " " + postTime + " " + "testBuyTicket Test0: beginTickets=" + beginTickets + ".");
             fail("Err: Inquiry wrong seats!");
             assert false : "Err: Inquiry wrong seats!";
-            return false;
         }
 
         /**
@@ -95,7 +52,6 @@ public class UnitTest {
             System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test1: Cannot buy a ticket!");
             fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
-            return false;
         }
         int remainTickets = tds.inquiry(route, departure, arrival);
         if (remainTickets != (beginTickets - 1)) {
@@ -104,7 +60,6 @@ public class UnitTest {
                     + remainTickets + ".");
             fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
-            return false;
         }
         /**
          * 2. Test buy all tickets
@@ -118,7 +73,6 @@ public class UnitTest {
                         + "testBuyTicket Test2.1: Cannot buy a ticket in turn " + i + ".");
                 fail("Err: Cannot buy a ticket!");
                 assert false : "Err: Cannot buy a ticket!";
-                return false;
             }
         }
         // second we find what we can buy
@@ -129,7 +83,6 @@ public class UnitTest {
                     + remainTickets + ".");
             fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
-            return false;
         }
         // third, we try to buy 1 to 2, 1 tickets remain
         if ((ticket = tds.buyTicket(passenger, route, 1, 2)) == null) {
@@ -137,7 +90,6 @@ public class UnitTest {
             System.err.println(preTime + " " + postTime + " " + "testBuyTicket Test2.3: Cannot buy a ticket!");
             fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
-            return false;
         }
         remainTickets = tds.inquiry(route, 1, 2);
         if (remainTickets != 0) {
@@ -146,7 +98,6 @@ public class UnitTest {
                     + remainTickets + ".");
             fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
-            return false;
         }
         /**
          * 3. Test overbound situation
@@ -157,12 +108,12 @@ public class UnitTest {
                     preTime + " " + postTime + " " + "testBuyTicket Test3: Can buy a ticket when 0 ticket remain???");
             fail("Err: Can buy a ticket when 0 ticket remain!");
             assert false : "Err: Can buy a ticket when 0 ticket remain!";
-            return false;
         }
-        return true;
     }
 
-    private boolean testRefundTicket() throws InterruptedException {
+    @Test
+    void testRefundTicket() throws InterruptedException {
+        startTime = System.nanoTime();
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, 1);
         int route = routenum - 1;
         int departure = 1;
@@ -175,7 +126,6 @@ public class UnitTest {
                     preTime + " " + postTime + " " + "testRefundTicket Test0: beginTickets=" + beginTickets + ".");
             fail("Err: Inquiry wrong seats!");
             assert false : "Err: Inquiry wrong seats!";
-            return false;
         }
         // rand a ticket
         Random rand = new Random(System.currentTimeMillis());
@@ -193,7 +143,6 @@ public class UnitTest {
             System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test1: Cannot buy/refund a ticket!");
             fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
-            return false;
         }
         int remainTickets = tds.inquiry(route, departure, arrival);
         if (remainTickets != beginTickets) {
@@ -202,7 +151,6 @@ public class UnitTest {
                     + remainTickets + ".");
             fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
-            return false;
         }
         /**
          * 2. Test refund a ticket with wrong ticket info
@@ -212,7 +160,6 @@ public class UnitTest {
             System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test2: Cannot refund a ticket!");
             fail("Err: Cannot buy a ticket!");
             assert false : "Err: Cannot buy a ticket!";
-            return false;
         }
         remainTickets = tds.inquiry(route, departure, arrival);
         if (remainTickets != beginTickets) {
@@ -221,12 +168,12 @@ public class UnitTest {
                     + remainTickets + ".");
             fail("Err: Return error ticket number!");
             assert false : "Err: Return error ticket number!";
-            return false;
         }
-        return true;
     }
 
-    private boolean testInquiryTicket() throws InterruptedException {
+    @Test
+    void testInquiryTicket() throws InterruptedException {
+        startTime = System.nanoTime();
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, 1);
         int route = routenum - 2;
         int departure = 1;
@@ -242,7 +189,6 @@ public class UnitTest {
                     preTime + " " + postTime + " " + "testInquiryTicket Test0: beginTickets=" + beginTickets + ".");
             fail("Err: Inquiry wrong seats!");
             assert false : "Err: Inquiry wrong seats!";
-            return false;
         }
         /**
          * 1. Test inquiry by sold some tickets
@@ -256,7 +202,6 @@ public class UnitTest {
                         preTime + " " + postTime + " " + "testInquiryTicket Test1: beginTickets=" + beginTickets + ".");
                 fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
-                return false;
             }
         }
         /**
@@ -277,7 +222,6 @@ public class UnitTest {
                         preTime + " " + postTime + " " + "testInquiryTicket Test2: beginTickets=" + beginTickets + ".");
                 fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
-                return false;
             }
             tks.add(tic);
         }
@@ -290,10 +234,8 @@ public class UnitTest {
                         preTime + " " + postTime + " " + "testInquiryTicket Test2: beginTickets=" + beginTickets + ".");
                 fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
-                return false;
             }
             tks.remove(tic);
         }
-        return true;
     }
 }
