@@ -1,8 +1,12 @@
 package ticketingsystem;
 
 import java.util.*;
-import static org.junit.jupiter.api.Assertions.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
+@DisplayName("RandomTest")
 public class RandomTest {
     int threadnum = 4;
     int routenum = 3; // route is designed from 1 to 3
@@ -21,20 +25,9 @@ public class RandomTest {
         return "passenger" + uid;
     }
 
-    public RandomTest() {
-        this(3, 5, 10, 8, 4, 1000);
-    }
-
-    public RandomTest(int routenum, int coachnum, int seatnum, int stationnum, int threadnum, int testnum) {
-        this.routenum = routenum;
-        this.coachnum = coachnum;
-        this.seatnum = seatnum;
-        this.stationnum = stationnum;
-        this.threadnum = threadnum;
-        this.testnum = testnum;
-    }
-
-    public void beginTest() throws InterruptedException {
+    @Test
+    @DisplayName("RandomTest - beginTest")
+    void beginTest() throws InterruptedException {
 
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, threadnum);
 
@@ -72,7 +65,7 @@ public class RandomTest {
                                 long preTime = System.nanoTime() - startTime;
                                 System.err.println(preTime + " " + String.valueOf(System.nanoTime() - startTime) + " "
                                         + ThreadId.get() + " " + "ErrOfRefund");
-                                assertNotEquals(ticket, null, "Err: soldTicket out of bounds");
+                                assertNotNull(ticket, "Err: soldTicket out of bounds");
                                 assert false : "Err: soldTicket out of bounds";
                             }
                         } else

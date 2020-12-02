@@ -1,26 +1,30 @@
 package ticketingsystem;
 
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * unit test This test is only run in single thread.
  */
+@DisplayName("UnitTest")
 public class UnitTest {
-    int routenum = 3;           // route is designed from 1 to 3
-    int coachnum = 5;           // coach is arranged from 1 to 5
-    int seatnum = 10;           // seat is allocated from 1 to 20
-    int stationnum = 8;         // station is designed from 1 to 5
+    int routenum = 3; // route is designed from 1 to 3
+    int coachnum = 5; // coach is arranged from 1 to 5
+    int seatnum = 10; // seat is allocated from 1 to 20
+    int stationnum = 8; // station is designed from 1 to 5
     long startTime;
-    
+
     private String passengerName() {
         Random rand = new Random(System.currentTimeMillis());
-        long uid = rand.nextInt();
+        long uid = rand.nextLong();
         return "passenger" + uid;
     }
-    
+
     @Test
+    @DisplayName("UnitTest - Test BuyTicket")
     void testBuyTicket() throws InterruptedException {
         startTime = System.nanoTime();
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, 1);
@@ -112,6 +116,7 @@ public class UnitTest {
     }
 
     @Test
+    @DisplayName("UnitTest - Test RefundTicket")
     void testRefundTicket() throws InterruptedException {
         startTime = System.nanoTime();
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, 1);
@@ -172,6 +177,7 @@ public class UnitTest {
     }
 
     @Test
+    @DisplayName("UnitTest - Test InquiryTicket")
     void testInquiryTicket() throws InterruptedException {
         startTime = System.nanoTime();
         final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, 1);
@@ -208,9 +214,9 @@ public class UnitTest {
          * 2. Test inquiry by sold/refunded some tickets
          */
         beginTickets = tds.inquiry(route, departure, arrival);
-        int sell = rand.nextInt(beginTickets / 2 - 2) + 1;
-        int buy = rand.nextInt(beginTickets / 2 - 2) + 1;
-        sell = Math.max(sell, buy);
+        int refund = rand.nextInt(beginTickets / 2 - 3) + 2;
+        int buy = rand.nextInt(beginTickets / 2 - 3) + 2;
+        refund = Math.max(refund, buy);
         preTime = System.nanoTime() - startTime;
         ArrayList<Ticket> tks = new ArrayList<Ticket>();
         Ticket tic = null;
@@ -226,12 +232,15 @@ public class UnitTest {
             tks.add(tic);
         }
 
-        for (int i = 1; i < sell; ++i) {
+        beginTickets = tds.inquiry(route, departure, arrival);
+        for (int i = 0; i < refund; ++i) {
             tic = tks.get(rand.nextInt(tks.size()));
-            if (!tds.refundTicket(tic) || tds.inquiry(route, departure, arrival) != beginTickets - i) {
+            if (!tds.refundTicket(tic) || 
+                (tds.inquiry(route, departure, arrival) != beginTickets + i + 1)) {
                 long postTime = System.nanoTime() - startTime;
                 System.err.println(
-                        preTime + " " + postTime + " " + "testInquiryTicket Test2: beginTickets=" + beginTickets + ".");
+                        preTime + " " + postTime + " " + "testInquiryTicket Test2: remain=" + tds.inquiry(route, departure, arrival) 
+                        + ",but we need have " + (beginTickets + i + 1) + ".");
                 fail("Err: Inquiry wrong seats!");
                 assert false : "Err: Inquiry wrong seats!";
             }
