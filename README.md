@@ -2,6 +2,12 @@
 
 多核与并发数据结构-用于列车售票的可线性化并发数据结构
 
+![Travis (.com)](https://img.shields.io/travis/com/specialpointcentral/TrainTicketingSystem?logo=travis-ci&logoColor=white&style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/specialpointcentral/TrainTicketingSystem/Java%20CI%20with%20Maven?logo=github&logoColor=whhite&style=flat-square)
+![GitHub](https://img.shields.io/github/license/specialpointcentral/TrainTicketingSystem?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/specialpointcentral/TrainTicketingSystem?style=flat-square)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/specialpointcentral/TrainTicketingSystem?style=flat-square)
+
 ## 数据结构说明
 
 给定`Ticket`类：
