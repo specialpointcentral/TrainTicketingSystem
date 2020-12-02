@@ -233,10 +233,10 @@ public class UnitTest {
         }
 
         beginTickets = tds.inquiry(route, departure, arrival);
-        for (int i = 0; i < refund; ++i) {
+        for (int i = 1; i < refund && tks.size() > 0; ++i) {
             tic = tks.get(rand.nextInt(tks.size()));
             if (!tds.refundTicket(tic) || 
-                (tds.inquiry(route, departure, arrival) != beginTickets + i + 1)) {
+                (tds.inquiry(route, departure, arrival) != beginTickets + i)) {
                 long postTime = System.nanoTime() - startTime;
                 System.err.println(
                         preTime + " " + postTime + " " + "testInquiryTicket Test2: remain=" + tds.inquiry(route, departure, arrival) 
