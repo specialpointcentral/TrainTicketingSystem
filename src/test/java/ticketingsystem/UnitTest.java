@@ -216,7 +216,7 @@ public class UnitTest {
         beginTickets = tds.inquiry(route, departure, arrival);
         int refund = rand.nextInt(beginTickets / 2 - 3) + 2;
         int buy = rand.nextInt(beginTickets / 2 - 3) + 2;
-        refund = Math.max(refund, buy);
+        refund = Math.min(refund, buy);
         preTime = System.nanoTime() - startTime;
         ArrayList<Ticket> tks = new ArrayList<Ticket>();
         Ticket tic = null;

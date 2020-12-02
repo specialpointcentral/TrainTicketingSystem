@@ -29,11 +29,11 @@ public class MultiThreadTest {
 
     int opForRoute;
     // ticketing date struct
-    int threadnum = 1;
-    int routenum = 3; // route is designed from 1 to 3
-    int coachnum = 5; // coach is arranged from 1 to 5
-    int seatnum = 10; // seat is allocated from 1 to 20
-    int stationnum = 8; // station is designed from 1 to 5
+    int threadnum = 16;
+    int routenum = 6; // route is designed from 1 to 6
+    int coachnum = 8; // coach is arranged from 1 to 8
+    int seatnum = 100; // seat is allocated from 1 to 100
+    int stationnum = 8; // station is designed from 1 to 8
     final static int TESTNUM = 10;
     private byte[] lock = new byte[0];
     protected TicketingDS tds;
