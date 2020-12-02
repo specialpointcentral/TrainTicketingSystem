@@ -86,8 +86,8 @@ public class MultiThreadTest {
             // remainTicketNum need equal to sold - refund
             int remainTicketNum = tds.inquiry(opForRoute, stationnum / 2, stationnum / 2 + 1);
             int cannotSoldTicketNum = cannotSoldTicket.size();
-            assertEquals(remainTicketNum, soldTicketNum.get() - refundTicketNum.get(),
-                    "Value remainTicketNum need equal to soldTicketNum - refundTicketNum");
+            assertEquals(remainTicketNum, coachnum * seatnum - soldTicketNum.get() + refundTicketNum.get(),
+                    "Value remainTicketNum need equal to all - soldTicketNum + refundTicketNum");
 
         } catch (Exception e) {
             fail("RuntimeException: " + e.getMessage());
