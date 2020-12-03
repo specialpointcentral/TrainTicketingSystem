@@ -35,9 +35,7 @@ public class TicketingDS implements TicketingSystem {
         ticket.arrival = arrival;
         ticket.coach = (seat / (seatnum / coachnum)) + 1;
         ticket.seat = (seat % (seatnum / coachnum)) + 1;
-        if (ticket.seat == 0) {
-            System.err.println("Error!");
-        }
+
         soldTickets.put(ticket.tid, ticket);
         return ticket;
     }
