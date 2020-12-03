@@ -5,7 +5,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,10 +32,14 @@ public class MultiThreadTest {
     int routenum = 6; // route is designed from 1 to 6
     int coachnum = 8; // coach is arranged from 1 to 8
     int seatnum = 100; // seat is allocated from 1 to 100
-    int stationnum = 8; // station is designed from 1 to 8
+    int stationnum = 16; // station is designed from 1 to 16
     final static int TESTNUM = 10;
     private byte[] lock = new byte[0];
     protected TicketingDS tds;
+
+    // system start time
+    protected long startTime;
+    protected int currentRepetition, totalRepetitions;
 
     private String passengerName() {
         Random rand = new Random(System.currentTimeMillis());
@@ -46,8 +49,8 @@ public class MultiThreadTest {
 
     @BeforeEach
     void beforeEach(TestInfo testInfo, RepetitionInfo repetitionInfo) {
-        int currentRepetition = repetitionInfo.getCurrentRepetition();
-        int totalRepetitions = repetitionInfo.getTotalRepetitions();
+        currentRepetition = repetitionInfo.getCurrentRepetition();
+        totalRepetitions = repetitionInfo.getTotalRepetitions();
         String methodName = testInfo.getTestMethod().get().getName();
         System.out.println(
                 String.format("Execute repetition %d of %d for %s", currentRepetition, totalRepetitions, methodName));
@@ -65,6 +68,7 @@ public class MultiThreadTest {
         soldTicketNum.set(0);
         refundTicketNum.set(0);
         realRefundTicketNum.set(0);
+        startTime = System.nanoTime();
     }
 
     @RepeatedTest(value = TESTNUM, name = "{displayName} {currentRepetition}/{totalRepetitions}")
@@ -108,18 +112,20 @@ public class MultiThreadTest {
                     int arrival = stationnum / 2 + rand.nextInt(stationnum - stationnum / 2) + 1;
                     String passenger = passengerName();
                     Ticket ticket = tds.buyTicket(passenger, opForRoute, departure, arrival);
-                    Thread.sleep(rand.nextInt(100));
                     if (ticket != null) {
-                        System.err.printf("B: %d-%d\t(%d)->(%d)\n", ticket.coach, ticket.seat, ticket.departure,
-                                ticket.arrival);
+                        System.out.printf("[%02d/%02d](%-13d) B: %03d-%03d => (%02d)->(%02d)\n", currentRepetition,
+                                totalRepetitions, System.nanoTime() - startTime, ticket.coach, ticket.seat,
+                                ticket.departure, ticket.arrival);
                         soldTicketNum.getAndIncrement();
                         soldTicket.add(ticket);
+                        System.out.flush();
                     } else {
                         int[] t = new int[2];
                         t[0] = departure;
                         t[1] = arrival;
                         cannotSoldTicket.add(t);
                     }
+                    Thread.sleep(rand.nextInt(10));
                 }
                 barrier.await();
             } catch (Exception e) {
@@ -137,7 +143,7 @@ public class MultiThreadTest {
                 Ticket tic = null;
                 boolean refundOK = false;
                 Random rand = new Random(System.currentTimeMillis());
-                Thread.sleep(rand.nextInt(100));
+                Thread.sleep(rand.nextInt(10));
                 while (!soldTicket.isEmpty()) {
                     synchronized (lock) {
                         tic = null;
@@ -146,15 +152,22 @@ public class MultiThreadTest {
                             soldTicket.remove(tic);
                         }
                     }
-                    Thread.sleep(rand.nextInt(200));
                     if (tic != null) {
-                        System.err.printf("R: %d-%d\t(%d)->(%d)\n", tic.coach, tic.seat, tic.departure, tic.arrival);
                         refundTicketNum.getAndIncrement();
                         refundOK = tds.refundTicket(tic);
+                        System.out.printf("[%02d/%02d](%-13d) R: %03d-%03d <= (%02d)->(%02d)\n", currentRepetition,
+                                totalRepetitions, System.nanoTime() - startTime, tic.coach, tic.seat, tic.departure,
+                                tic.arrival);
+                        System.out.flush();
                         if (refundOK) {
                             realRefundTicketNum.getAndIncrement();
+                        } else {
+                            System.err.printf("[%02d/%02d](%-13d) R: %03d-%03d != (%02d)->(%02d)\n", currentRepetition,
+                                    totalRepetitions, System.nanoTime() - startTime, tic.coach, tic.seat, tic.departure,
+                                    tic.arrival);
                         }
                     }
+                    Thread.sleep(rand.nextInt(20));
                 }
                 barrier.await();
             } catch (Exception e) {
