@@ -8,16 +8,18 @@ public class Train {
     private final int seatNum;
     private final int coachNum;
     private final int stationNum;
+    private final int allSeatNum;
 
     // map for remain seats
     private AtomicInteger[][] remainSeats;
 
     public Train(final int coachnum, final int seatnum, final int stationnum) {
-        this.seatNum = coachnum * seatnum;
+        this.seatNum = seatnum;
+        this.allSeatNum = coachnum * seatnum;
         this.coachNum = coachnum;
         this.stationNum = stationnum;
-        this.seats = new AtomicLong[this.seatNum];
-        for (int i = 0; i < this.seatNum; ++i) {
+        this.seats = new AtomicLong[this.allSeatNum];
+        for (int i = 0; i < this.allSeatNum; ++i) {
             this.seats[i] = new AtomicLong(0);
         }
         this.remainSeats = new AtomicInteger[stationnum][];
@@ -29,25 +31,31 @@ public class Train {
             this.remainSeats[i] = new AtomicInteger[stationnum - i];
             this.remainSeats[i][0] = new AtomicInteger(0);
             for (int j = 1; j < stationnum - i; ++j) {
-                remainSeats[i][j] = new AtomicInteger(this.seatNum);
+                remainSeats[i][j] = new AtomicInteger(this.allSeatNum);
             }
         }
     }
 
     public int getAndLockSeat(final int departure, final int arrival) {
+        return getAndLockSeat(departure, arrival, 0);
+    }
+
+    public int getAndLockSeat(final int departure, final int arrival, final int beginCoach) {
         // check if has seats
         while (haveRemainSeats(departure, arrival)) {
+            int beginSeat = (beginCoach % coachNum) * seatNum;
             // find the seat
-            for (int i = 0; i < seatNum; ++i) {
-                long tmp = seats[i].get();
+            for (int i = 0; i < allSeatNum; ++i) {
+                int pos = (beginSeat + i) % allSeatNum;
+                long tmp = seats[pos].get();
                 // if seat is not occupied
                 while (!isSeatOccupied(tmp, departure, arrival)) {
                     // CAS!
-                    if (seats[i].compareAndSet(tmp, setOccupied(tmp, departure, arrival))) {
+                    if (seats[pos].compareAndSet(tmp, setOccupied(tmp, departure, arrival))) {
                         occupiedRemainSeats(departure, arrival);
-                        return i;
+                        return pos;
                     }
-                    tmp = seats[i].get();
+                    tmp = seats[pos].get();
                 }
             }
         }
