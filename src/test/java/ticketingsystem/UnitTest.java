@@ -163,8 +163,8 @@ public class UnitTest {
         if (tds.refundTicket(ticket)) {
             long postTime = System.nanoTime() - startTime;
             System.err.println(preTime + " " + postTime + " " + "testRefundTicket Test2: Cannot refund a ticket!");
-            fail("Err: Cannot buy a ticket!");
-            assert false : "Err: Cannot buy a ticket!";
+            fail("Err: Cannot refund a ticket!");
+            assert false : "Err: Cannot refund a ticket!";
         }
         remainTickets = tds.inquiry(route, departure, arrival);
         if (remainTickets != beginTickets) {

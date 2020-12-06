@@ -161,6 +161,10 @@ public class MultiThreadTest {
                         System.out.flush();
                         if (refundOK) {
                             realRefundTicketNum.getAndIncrement();
+                            if(tds.refundTicket(tic)) {
+                                // cannot success
+                                realRefundTicketNum.getAndDecrement();
+                            }
                         } else {
                             System.err.printf("[%02d/%02d](%-13d) R: %03d-%03d != (%02d)->(%02d)\n", currentRepetition,
                                     totalRepetitions, System.nanoTime() - startTime, tic.coach, tic.seat, tic.departure,
