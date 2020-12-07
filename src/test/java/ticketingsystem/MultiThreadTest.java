@@ -28,12 +28,12 @@ public class MultiThreadTest {
 
     int opForRoute;
     // ticketing date struct
-    int threadnum = 16;
-    int routenum = 6; // route is designed from 1 to 6
-    int coachnum = 8; // coach is arranged from 1 to 8
-    int seatnum = 100; // seat is allocated from 1 to 100
-    int stationnum = 16; // station is designed from 1 to 16
-    final static int TESTNUM = 10;
+    int threadnum = 64;
+    int routenum = 20;      // route is designed from 1 to 20
+    int coachnum = 10;      // coach is arranged from 1 to 10
+    int seatnum = 100;      // seat is allocated from 1 to 100
+    int stationnum = 16;    // station is designed from 1 to 16
+    final static int TESTNUM = 50;
     private byte[] lock = new byte[0];
     protected TicketingDS tds;
 
@@ -105,7 +105,7 @@ public class MultiThreadTest {
             Random rand = new Random(System.currentTimeMillis());
             try {
                 barrier.await();
-                int buyTicketNum = rand.nextInt(coachnum * seatnum / threadnum) + (coachnum * seatnum / threadnum);
+                int buyTicketNum = rand.nextInt(coachnum * seatnum / threadnum) + (coachnum * seatnum / threadnum) + 1;
                 for (int i = 0; i < buyTicketNum; ++i) {
                     // we make all of them pass station stationnum / 2
                     int departure = rand.nextInt(stationnum / 2) + 1;
