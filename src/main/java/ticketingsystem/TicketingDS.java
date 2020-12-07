@@ -66,13 +66,29 @@ public class TicketingDS implements TicketingSystem {
 
     @Override
     public boolean refundTicket(Ticket ticket) {
-        if (!soldTickets.containsKey(ticket.tid) || !ticket.equals(soldTickets.get(ticket.tid))) {
+        if (!soldTickets.containsKey(ticket.tid) || 
+            !ticketEquals(ticket, soldTickets.get(ticket.tid))) {
             return false;
         }
         soldTickets.remove(ticket.tid, ticket);
         Train currTrian = trains[ticket.route - 1];
         int seat = (ticket.coach - 1) * (seatNum / coachNum) + (ticket.seat - 1);
         return currTrian.unlockSeat(seat, ticket.departure - 1, ticket.arrival - 1);
+    }
+
+    private boolean ticketEquals(Ticket x, Ticket y) {
+        if(x == y) return true;
+        if(x == null || y == null) return false;
+        
+        return( 
+            (x.tid == y.tid)                    &&
+            (x.passenger.equals(y.passenger))   &&
+            (x.route == y.route)                &&
+            (x.coach == y.coach)                &&
+            (x.seat == y.seat)                  &&
+            (x.departure == y.departure)        &&
+            (x.arrival == y.arrival)
+        );
     }
 
 }
