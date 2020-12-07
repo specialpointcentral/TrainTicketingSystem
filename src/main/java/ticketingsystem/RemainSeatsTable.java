@@ -48,7 +48,8 @@ public class RemainSeatsTable {
         for (int i = 0; i < arrival; ++i) {
             // arrival station
             for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] - 1;
+                remainSeats[1 - currTag][i][j - i]--;
+                remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
             }
         }
         // finish modify
@@ -59,9 +60,9 @@ public class RemainSeatsTable {
         int currTag = 1 - tag.getReference();
         // departure station
         for (int i = 0; i < arrival; ++i) {
-            // arrival station
             for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] + 1;
+                remainSeats[1 - currTag][i][j - i]++;
+                remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
             }
         }
         // finish modify
