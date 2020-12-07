@@ -1,6 +1,5 @@
 package ticketingsystem;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicStampedReference;
 
 public class RemainSeatsTable {
@@ -31,17 +30,17 @@ public class RemainSeatsTable {
     public int getRemainSeats(final int departure, final int arrival) {
         int currTimestap = tag.getStamp();
         int currTag = tag.getReference();
-        int remain = remainSeats[currTag % 2][departure][arrival - departure];
+        int remain = remainSeats[currTag][departure][arrival - departure];
         while (!tag.compareAndSet(currTag, currTag, currTimestap, currTimestap)) {
             currTimestap = tag.getStamp();
             currTag = tag.getReference();
-            remain = remainSeats[currTag % 2][departure][arrival - departure];
+            remain = remainSeats[currTag][departure][arrival - departure];
         }
         return remain;
     }
 
     public synchronized void decrementRemainSeats(final int departure, final int arrival) {
-        int currTag = (tag.getReference() + 1) % 2;
+        int currTag = 1 - tag.getReference();
         // 0 1 2 3 4 5
         // Example: 2->4
         // 0-3 -> 3-5
@@ -49,7 +48,7 @@ public class RemainSeatsTable {
         for (int i = 0; i < arrival; ++i) {
             // arrival station
             for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                remainSeats[currTag][i][j - i] = remainSeats[(currTag + 1) % 2][i][j - i] - 1;
+                remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] - 1;
             }
         }
         // finish modify
@@ -57,12 +56,12 @@ public class RemainSeatsTable {
     }
 
     public synchronized void incrementRemainSeats(final int departure, final int arrival) {
-        int currTag = (tag.getReference() + 1) % 2;
+        int currTag = 1 - tag.getReference();
         // departure station
         for (int i = 0; i < arrival; ++i) {
             // arrival station
             for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                remainSeats[currTag][i][j - i] = remainSeats[(currTag + 1) % 2][i][j - i] + 1;
+                remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] + 1;
             }
         }
         // finish modify
