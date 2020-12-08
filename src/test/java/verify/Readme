@@ -1,0 +1,13 @@
+1. copy Trace.java to your dir
+2. generate trace
+3. enter verify dir
+4. execute "java -jar verify.jar trace"
+
+If the first error is found, the result is as follows:
+
+Error: RemainTicket 57982522 57982654 0 3 3 2 3
+Real RemainTicket is 3 , Expect RemainTicket is 4, 3 2 3
+Verification Finished
+
+Else only "Verification Finished" is printed.
+
