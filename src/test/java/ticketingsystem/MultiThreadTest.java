@@ -113,12 +113,12 @@ public class MultiThreadTest {
                     String passenger = passengerName();
                     Ticket ticket = tds.buyTicket(passenger, opForRoute, departure, arrival);
                     if (ticket != null) {
-                        System.out.printf("[%02d/%02d](%-13d) B: %03d-%03d => (%02d)->(%02d)\n", currentRepetition,
-                                totalRepetitions, System.nanoTime() - startTime, ticket.coach, ticket.seat,
-                                ticket.departure, ticket.arrival);
+                        // System.out.printf("[%02d/%02d](%-13d) B: %03d-%03d => (%02d)->(%02d)\n", currentRepetition,
+                        //         totalRepetitions, System.nanoTime() - startTime, ticket.coach, ticket.seat,
+                        //         ticket.departure, ticket.arrival);
                         soldTicketNum.getAndIncrement();
                         soldTicket.add(ticket);
-                        System.out.flush();
+                        // System.out.flush();
                     } else {
                         int[] t = new int[2];
                         t[0] = departure;
@@ -155,10 +155,10 @@ public class MultiThreadTest {
                     if (tic != null) {
                         refundTicketNum.getAndIncrement();
                         refundOK = tds.refundTicket(tic);
-                        System.out.printf("[%02d/%02d](%-13d) R: %03d-%03d <= (%02d)->(%02d)\n", currentRepetition,
-                                totalRepetitions, System.nanoTime() - startTime, tic.coach, tic.seat, tic.departure,
-                                tic.arrival);
-                        System.out.flush();
+                        // System.out.printf("[%02d/%02d](%-13d) R: %03d-%03d <= (%02d)->(%02d)\n", currentRepetition,
+                        //         totalRepetitions, System.nanoTime() - startTime, tic.coach, tic.seat, tic.departure,
+                        //         tic.arrival);
+                        // System.out.flush();
                         if (refundOK) {
                             realRefundTicketNum.getAndIncrement();
                             if(tds.refundTicket(tic)) {
