@@ -51,8 +51,8 @@ public class TicketingDS implements TicketingSystem {
         ticket.route = route;
         ticket.departure = departure;
         ticket.arrival = arrival;
-        ticket.coach = (seat / (seatNum / coachNum)) + 1;
-        ticket.seat = (seat % (seatNum / coachNum)) + 1;
+        ticket.coach = (seat / seatNum) + 1;
+        ticket.seat = (seat % seatNum) + 1;
 
         soldTickets.put(ticket.tid, ticket);
         return ticket;
@@ -72,7 +72,7 @@ public class TicketingDS implements TicketingSystem {
         }
         soldTickets.remove(ticket.tid, ticket);
         Train currTrian = trains[ticket.route - 1];
-        int seat = (ticket.coach - 1) * (seatNum / coachNum) + (ticket.seat - 1);
+        int seat = (ticket.coach - 1) * seatNum + (ticket.seat - 1);
         return currTrian.unlockSeat(seat, ticket.departure - 1, ticket.arrival - 1);
     }
 

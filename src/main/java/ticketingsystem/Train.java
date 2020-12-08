@@ -40,7 +40,7 @@ public class Train {
                 while (!isSeatOccupied(tmp, departure, arrival)) {
                     // CAS!
                     if (seats[pos].compareAndSet(tmp, setOccupied(tmp, departure, arrival))) {
-                        remainSeats.decrementRemainSeats(departure, arrival);
+                        remainSeats.decrementRemainSeats(departure, arrival, tmp);
                         return pos;
                     }
                     tmp = seats[pos].get();
@@ -58,7 +58,7 @@ public class Train {
         while (true) {
             long tmp = seats[seat].get();
             if (seats[seat].compareAndSet(tmp, cleanOccupied(seats[seat].get(), departure, arrival))) {
-                remainSeats.incrementRemainSeats(departure, arrival);
+                remainSeats.incrementRemainSeats(departure, arrival, cleanOccupied(seats[seat].get(), departure, arrival));
                 return true;
             }
         }

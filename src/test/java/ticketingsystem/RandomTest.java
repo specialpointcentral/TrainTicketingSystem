@@ -8,11 +8,11 @@ import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("RandomTest")
 public class RandomTest {
-    int threadnum = 4;
-    int routenum = 3; // route is designed from 1 to 3
+    int threadnum = 1;
+    int routenum = 1; // route is designed from 1 to 3
     int coachnum = 5; // coach is arranged from 1 to 5
     int seatnum = 10; // seat is allocated from 1 to 20
-    int stationnum = 8; // station is designed from 1 to 5
+    int stationnum = 3; // station is designed from 1 to 5
 
     int testnum = 1000;
     final static int RETPC = 30; // return ticket operation is 10% percent
