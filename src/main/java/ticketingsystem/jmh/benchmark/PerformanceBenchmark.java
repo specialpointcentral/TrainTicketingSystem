@@ -41,7 +41,7 @@ public class PerformanceBenchmark {
         return "passenger" + uid;
     }
 
-    @Setup
+    @Setup(Level.Iteration)
     public void init() {
         this.pool = Executors.newFixedThreadPool(nThreads);
         tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, nThreads);
@@ -63,7 +63,7 @@ public class PerformanceBenchmark {
         return nThreads;
     }
 
-    @TearDown
+    @TearDown(Level.Iteration)
     public void finish() {
         pool.shutdown();
     }
