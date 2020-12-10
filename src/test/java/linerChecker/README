@@ -1,0 +1,36 @@
+1. 说明
+  本测试包含有一个测试工具checker.jar以及一个方便测试的脚本check.sh
+  测试工具的使用格式如下:
+    java -jar checker.jar --coach xx --seat xx --station xx < trace
+  其他使用说明见参数--help
+
+2. 使用步骤
+  step 1: 将本包中的文件加压到ticketingsystem的同级目录
+  step 2: 修改ticketingsystem/Trace.java中的参数，routenum请务必设置成1
+  step 3: 得到一个trace
+  step 4: 运行命令checker.jar
+
+3. 结果说明
+  如果trace可线性化，会打印出线性化的执行路径。否则输出Not Linearizable.
+
+4. 注意事项
+  check.sh是一个便于测试的脚本，可以直接运行。使用前请修改脚本中的参数。
+  Trace.java中route数请设置为1，火车间是独立的，所以checker我是按照一辆车检验的。
+  当前版本支持的trace记录数可以达到500条左右，运行时间随着交叠区间个数增加呈指数级上升。所以建议不要生成过大的trace文件。
+
+  推荐的设置值：
+	final static int threadnum = 5;
+	final static int routenum = 1; // route is designed from 1 to 3
+	final static int coachnum = 3; // coach is arranged from 1 to 5
+	final static int seatnum = 5; // seat is allocated from 1 to 20
+	final static int stationnum = 5; // station is designed from 1 to 5
+	final static int testnum = 20;
+
+  可以常识的设置值: (一般500条一下运行时间可以接受)
+	final static int threadnum = 5;
+	final static int routenum = 1; // route is designed from 1 to 3
+	final static int coachnum = 10; // coach is arranged from 1 to 5
+	final static int seatnum = 100; // seat is allocated from 1 to 20
+	final static int stationnum = 10; // station is designed from 1 to 5
+	final static int testnum = 100;
+

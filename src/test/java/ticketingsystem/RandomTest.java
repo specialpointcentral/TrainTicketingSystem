@@ -8,15 +8,15 @@ import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("RandomTest")
 public class RandomTest {
-    int threadnum = 1;
-    int routenum = 1; // route is designed from 1 to 3
-    int coachnum = 5; // coach is arranged from 1 to 5
-    int seatnum = 10; // seat is allocated from 1 to 20
-    int stationnum = 3; // station is designed from 1 to 5
+    int threadnum = 8;
+    int routenum = 20; // route is designed from 1 to 3
+    int coachnum = 10; // coach is arranged from 1 to 5
+    int seatnum = 100; // seat is allocated from 1 to 20
+    int stationnum = 16; // station is designed from 1 to 5
 
-    int testnum = 1000;
-    final static int RETPC = 30; // return ticket operation is 10% percent
-    final static int BUYPC = 60; // buy ticket operation is 30% percent
+    int testnum = 10000;
+    final static int RETPC = 10; // return ticket operation is 10% percent
+    final static int BUYPC = 30; // buy ticket operation is 30% percent
     final static int INQPC = 100; // inquiry ticket operation is 60% percent
 
     private String passengerName() {

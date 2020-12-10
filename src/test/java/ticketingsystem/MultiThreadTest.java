@@ -28,7 +28,7 @@ public class MultiThreadTest {
 
     int opForRoute;
     // ticketing date struct
-    int threadnum = 64;
+    int threadnum = 8;
     int routenum = 20;      // route is designed from 1 to 20
     int coachnum = 10;      // coach is arranged from 1 to 10
     int seatnum = 100;      // seat is allocated from 1 to 100

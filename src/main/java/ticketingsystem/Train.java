@@ -57,31 +57,32 @@ public class Train {
     public boolean unlockSeat(final int seat, final int departure, final int arrival) {
         while (true) {
             long tmp = seats[seat].get();
-            if (seats[seat].compareAndSet(tmp, cleanOccupied(seats[seat].get(), departure, arrival))) {
-                remainSeats.incrementRemainSeats(departure, arrival, cleanOccupied(seats[seat].get(), departure, arrival));
+            long cleanTmp = cleanOccupied(tmp, departure, arrival);
+            if (seats[seat].compareAndSet(tmp, cleanTmp)) {
+                remainSeats.incrementRemainSeats(departure, arrival, cleanTmp);
                 return true;
             }
         }
     }
 
-    private boolean isSeatOccupied(final long block, final int departure, final int arrival) {
+    private final boolean isSeatOccupied(final long block, final int departure, final int arrival) {
         long occupied = ((0x01 << (arrival - departure)) - 1) << departure;
         // 00000|0000|000000 block
         // 00000|1111|000000 occupied
         return (occupied & block) != 0;
     }
 
-    private long setOccupied(final long block, final int departure, final int arrival) {
+    private final long setOccupied(final long block, final int departure, final int arrival) {
         long occupied = ((0x01 << (arrival - departure)) - 1) << departure;
         return block | occupied;
     }
 
-    private long cleanOccupied(final long block, final int departure, final int arrival) {
+    private final long cleanOccupied(final long block, final int departure, final int arrival) {
         long occupied = ((0x01 << (arrival - departure)) - 1) << departure;
         return block & ~occupied;
     }
 
-    private boolean haveRemainSeats(final int departure, final int arrival) {
+    private final boolean haveRemainSeats(final int departure, final int arrival) {
         return remainSeats.getRemainSeats(departure, arrival) > 0;
     }
 }

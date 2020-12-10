@@ -76,7 +76,7 @@ public class TicketingDS implements TicketingSystem {
         return currTrian.unlockSeat(seat, ticket.departure - 1, ticket.arrival - 1);
     }
 
-    private boolean ticketEquals(Ticket x, Ticket y) {
+    private final boolean ticketEquals(Ticket x, Ticket y) {
         if(x == y) return true;
         if(x == null || y == null) return false;
         
