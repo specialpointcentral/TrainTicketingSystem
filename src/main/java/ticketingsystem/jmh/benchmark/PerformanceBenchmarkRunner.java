@@ -1,4 +1,4 @@
-package ticketingsystem.jmh.runner;
+package ticketingsystem.jmh.benchmark;
 
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -6,7 +6,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import ticketingsystem.jmh.benchmark.PerformanceBenchmark;
+import ticketingsystem.*;
 
 public class PerformanceBenchmarkRunner {
         public static void main(String[] args) throws RunnerException {

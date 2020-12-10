@@ -1,21 +1,20 @@
-package ticketingsystem.jmh.benchmark;
+package ticketingsystem;
 
 import org.openjdk.jmh.annotations.*;
 
 import java.util.*;
-import ticketingsystem.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.AverageTime)
+@BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 5, time = 5)
 @Fork(2)
 @State(value = Scope.Benchmark)
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 public class PerformanceBenchmark {
     @Param({ "1", "2", "4", "8", "16", "32", "64" })
     static int nThreads;
@@ -27,7 +26,7 @@ public class PerformanceBenchmark {
     final static int seatnum = 100; // seat is allocated from 1 to 20
     final static int stationnum = 16; // station is designed from 1 to 5
 
-    final static int testnum = 6400000;
+    final static int testnum = 64000;
     final static int retpc = 10; // return ticket operation is 10% percent
     final static int buypc = 30; // buy ticket operation is 30% percent
     final static int inqpc = 100; // inquiry ticket operation is 60% percent
@@ -37,7 +36,7 @@ public class PerformanceBenchmark {
 
     static String passengerName() {
         Random rand = new Random();
-        long uid = rand.nextInt(testnum);
+        long uid = rand.nextLong();
         return "passenger" + uid;
     }
 
@@ -45,7 +44,7 @@ public class PerformanceBenchmark {
     public void init() {
         this.pool = Executors.newFixedThreadPool(nThreads);
         tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, nThreads);
-        list = new ArrayList<Callable<Object>>();
+        list = new ArrayList<>();
         for (int i = 0; i < nThreads; i++) {
             list.add(new Callable<Object>() {
                 @Override
@@ -70,10 +69,10 @@ public class PerformanceBenchmark {
 
     private final void singleTrace() {
         Random rand = new Random();
-        MyTicket ticket = new MyTicket();
-        ArrayList<MyTicket> soldTicket = new ArrayList<MyTicket>();
+        Ticket ticket = null;
+        ArrayList<Ticket> soldTicket = new ArrayList<Ticket>();
 
-        for (int i = 0; i < testnum; i++) {
+        for (int i = 0; i < testnum / nThreads; i++) {
             int sel = rand.nextInt(inqpc);
             // return ticket
             if (0 <= sel && sel < retpc && soldTicket.size() > 0) {
@@ -96,7 +95,7 @@ public class PerformanceBenchmark {
                 int arrival = departure + rand.nextInt(stationnum - departure) + 1; // arrival is always
                                                                                     // greater than
                                                                                     // departure
-                if ((ticket = (MyTicket)tds.buyTicket(passenger, route, departure, arrival)) != null) {
+                if ((ticket = tds.buyTicket(passenger, route, departure, arrival)) != null) {
                     soldTicket.add(ticket);
                 }
             } else
