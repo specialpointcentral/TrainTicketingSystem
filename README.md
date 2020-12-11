@@ -2,7 +2,7 @@
 
 多核与并发数据结构-用于列车售票的可线性化并发数据结构
 
-![Travis (.com)](https://img.shields.io/travis/com/specialpointcentral/TrainTicketingSystem?logo=travis-ci&logoColor=white&style=flat-square)
+![Travis (.com)](https://img.shields.io/travis/com/specialpointcentral/TrainTicketingSystem?logo=travis-ci&logoColor=white&style=flat-square&link=https://travis-ci.com/specialpointcentral/TrainTicketingSystem)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/specialpointcentral/TrainTicketingSystem/Java%20CI%20with%20Maven?logo=github&logoColor=whhite&style=flat-square)
 ![GitHub](https://img.shields.io/github/license/specialpointcentral/TrainTicketingSystem?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/specialpointcentral/TrainTicketingSystem?style=flat-square)
@@ -173,3 +173,10 @@ final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum,
 
 项目支持`github workflow`以及`travis-ci`自动化测试，开箱即用。
 每次`push`都会自动触发测试。
+
+## 联系方式
+
+![GitHub issues](https://img.shields.io/github/issues/specialpointcentral/TrainTicketingSystem?style=flat-square&link=https://github.com/specialpointcentral/TrainTicketingSystem/issues)
+![GitHub followers](https://img.shields.io/github/followers/specialpointcentral?label=specialpointcentral&style=social&link=https://github.com/specialpointcentral)
+
+任何问题欢迎提交issue。
