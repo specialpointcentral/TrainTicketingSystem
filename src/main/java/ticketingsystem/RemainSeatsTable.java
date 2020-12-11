@@ -1,13 +1,15 @@
 package ticketingsystem;
 
 import java.util.concurrent.atomic.AtomicStampedReference;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class RemainSeatsTable {
     private int stationNum;
     private int[][][] remainSeats;
     private AtomicStampedReference<Integer> tag;
 
-    private Object seatTableLock = new Object();
+    private ReentrantLock seatTableLock = new ReentrantLock();
 
     public RemainSeatsTable(final int seatnum, final int stationnum) {
         this.stationNum = stationnum;
@@ -42,7 +44,8 @@ public class RemainSeatsTable {
     }
 
     public void decrementRemainSeats(final int departure, final int arrival, final long origin) {
-        synchronized (seatTableLock) {
+        try {
+            seatTableLock.lock();
             int currTag = 1 - tag.getReference();
             // 0 1 2 3 4 5
             // Example: 2->4
@@ -58,19 +61,24 @@ public class RemainSeatsTable {
                 }
             }
             // for (int i = 0; i < stationNum; ++i) {
-            //     for (int j = i + 1; j < stationNum; ++j) {
-            //         System.err.printf("0(%d, %d)=%d\t", i, j, remainSeats[0][i][j - i]);
-            //         System.err.printf("1(%d, %d)=%d\n", i, j, remainSeats[1][i][j - i]);
-            //     }
+            // for (int j = i + 1; j < stationNum; ++j) {
+            // System.err.printf("0(%d, %d)=%d\t", i, j, remainSeats[0][i][j - i]);
+            // System.err.printf("1(%d, %d)=%d\n", i, j, remainSeats[1][i][j - i]);
+            // }
             // }
             // System.err.println("");
             // finish modify
             tag.set(currTag, tag.getStamp() + 1);
+        } finally {
+            seatTableLock.unlock();
         }
+
     }
 
     public void incrementRemainSeats(final int departure, final int arrival, final long origin) {
-        synchronized (seatTableLock) {
+        try {
+            while(seatTableLock.isLocked());
+            seatTableLock.lock();
             int currTag = 1 - tag.getReference();
             // departure station
             // System.err.printf("I: %d,%d origin: %X\n", departure, arrival, origin);
@@ -82,14 +90,16 @@ public class RemainSeatsTable {
                 }
             }
             // for (int i = 0; i < stationNum; ++i) {
-            //     for (int j = i + 1; j < stationNum; ++j) {
-            //         System.err.printf("0(%d, %d)=%d\t", i, j, remainSeats[0][i][j - i]);
-            //         System.err.printf("1(%d, %d)=%d\n", i, j, remainSeats[1][i][j - i]);
-            //     }
+            // for (int j = i + 1; j < stationNum; ++j) {
+            // System.err.printf("0(%d, %d)=%d\t", i, j, remainSeats[0][i][j - i]);
+            // System.err.printf("1(%d, %d)=%d\n", i, j, remainSeats[1][i][j - i]);
+            // }
             // }
             // System.err.println("");
             // finish modify
             tag.set(currTag, tag.getStamp() + 1);
+        } finally {
+            seatTableLock.unlock();
         }
     }
 
