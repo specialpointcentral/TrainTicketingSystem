@@ -95,11 +95,62 @@ final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum,
 
 文件清单如下：
 
-1. `TicketingSystem.java`是规范文件，不能更改。
-2. `Trace.java`是trace生成程序，用于正确性验证，不能更改。
-3. `trace.sh`是trace生成脚本，用于正确性验证，不能更改。
-4. `TicketingDS.java`是并发数据结构的实现。
-5. `Test.java`实现多线程性能测试。
-    - `Test.java`为测试的主类
-    - `UnitTest.java`为系统的单元测试，为单线程运行
-    - `RandomTest.java`为系统的随机测试，通过多线程，随机购、退票完成
+- `trace.sh`是trace生成脚本，用于正确性验证，不能更改。
+- `pom.xml`是依赖配置文件，使用`mvn`。
+- `.travis.yml`是CI配置文件，用于自动化测试。
+- 文件夹`.github`是github自动化测试配置文件。
+- 文件夹`src/main/java`为代码文件夹。
+    1. `TicketingSystem.java`是规范文件，不能更改。
+    2. `Trace.java`是trace生成程序，用于正确性验证，不能更改。
+    3. `TicketingDS.java`是并发数据结构的实现。
+    4. `PerformanceBenchmark.java`是JMH基准测试程序。
+    5. `jmh.benchmark.PerformanceBenchmarkRunner.java`是JMH基准测试启动文件。
+
+- 文件夹`src/test/java`为测试文件夹。
+    1. `ticketingsystem`存放基本测试单元。
+        - `UnitTest.java`为系统的单元测试，为单线程运行。
+        - `RandomTest.java`为系统的随机测试，通过多线程，随机购、退、查票。
+        - `MultiThreadTest.java`为多线程买、退票测试程序，通过多线程随机购、退票。
+        - `TraceVerifyTest.java`为trace单线程可线性化比对测试。
+    2. `verify`文件夹存放trace单线程可线性化比对测试资源文件
+        - `Trace.java.copy`为Trace调用文件，会自动替换原先的Trace.java。
+        - `verify.jar`为单线程线性化测试包。
+    3. `linerChecker`文件夹存放trace多线程可线性化比对测试。
+        - `check.sh`为启动脚本。
+        - `checker.jar`为多线程线性化测试包。
+
+## 使用说明
+
+### 使用`maven`
+
+项目使用`maven`构建，运行前请安装`maven`。没有改变基本操作，常用的命令如下：
+
+- 通过`mvn clean`清理生成文件
+- 通过`mvn package`打成jar包
+- 通过`mvn test`执行测试
+- ...
+
+### 使用`Junit`进行正确性测试
+
+> 注意：你需要安装`maven`才能执行，并且在执行过程中会自动安装相应依赖。
+
+项目使用`Junit`进行正确性测试，你可以使用：
+
+- `mvn test`命令完成测试
+- 查看运行结果，会报告测试数量以及通过测试点数量。
+
+### 使用`JMH`进行性能测试
+
+> 注意：你需要安装`maven`才能执行，并且在执行过程中会自动安装相应依赖。
+
+项目使用`JMH`进行性能测试，你可以使用：
+
+- `mvn package`将项目打包
+- 在项目根目录下，运行：
+    - `java -cp .\target\trainTicketingSystem-1.0-SNAPSHOT.jar ticketingsystem.jmh.benchmark.PerformanceBenchmarkRunner`。
+    - 查看运行结果，结果单位为`ops/s`，即每秒操作数。这里的操作数与真实数量有差距，需要对数据乘上每次操作执行的买、退、查票动作数，即需要乘上64000。
+
+### 使用CI自动化测试
+
+项目支持`github workflow`以及`travis-ci`自动化测试，开箱即用。
+每次`push`都会自动触发测试。

@@ -14,7 +14,7 @@ public class RandomTest {
     int seatnum = 100; // seat is allocated from 1 to 20
     int stationnum = 16; // station is designed from 1 to 5
 
-    int testnum = 10000;
+    int testnum = 640000;
     final static int RETPC = 10; // return ticket operation is 10% percent
     final static int BUYPC = 30; // buy ticket operation is 30% percent
     final static int INQPC = 100; // inquiry ticket operation is 60% percent
@@ -49,12 +49,12 @@ public class RandomTest {
                             if ((ticket = soldTicket.remove(select)) != null) {
                                 long preTime = System.nanoTime() - startTime;
                                 if (tds.refundTicket(ticket)) {
-                                    long postTime = System.nanoTime() - startTime;
-                                    System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " "
-                                            + "TicketRefund" + " " + ticket.tid + " " + ticket.passenger + " "
-                                            + ticket.route + " " + ticket.coach + " " + ticket.departure + " "
-                                            + ticket.arrival + " " + ticket.seat);
-                                    System.out.flush();
+                                    // long postTime = System.nanoTime() - startTime;
+                                    // System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " "
+                                    //         + "TicketRefund" + " " + ticket.tid + " " + ticket.passenger + " "
+                                    //         + ticket.route + " " + ticket.coach + " " + ticket.departure + " "
+                                    //         + ticket.arrival + " " + ticket.seat);
+                                    // System.out.flush();
                                 } else {
                                     System.err.println(preTime + " " + String.valueOf(System.nanoTime() - startTime)
                                             + " " + ThreadId.get() + " " + "ErrOfRefund");
@@ -77,20 +77,20 @@ public class RandomTest {
                             int arrival = departure + rand.nextInt(stationnum - departure) + 1; // arrival is always
                                                                                                 // greater than
                                                                                                 // departure
-                            long preTime = System.nanoTime() - startTime;
+                            // long preTime = System.nanoTime() - startTime;
                             if ((ticket = tds.buyTicket(passenger, route, departure, arrival)) != null) {
-                                long postTime = System.nanoTime() - startTime;
-                                System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " "
-                                        + "TicketBought" + " " + ticket.tid + " " + ticket.passenger + " "
-                                        + ticket.route + " " + ticket.coach + " " + ticket.departure + " "
-                                        + ticket.arrival + " " + ticket.seat);
+                                // long postTime = System.nanoTime() - startTime;
+                                // System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " "
+                                //         + "TicketBought" + " " + ticket.tid + " " + ticket.passenger + " "
+                                //         + ticket.route + " " + ticket.coach + " " + ticket.departure + " "
+                                //         + ticket.arrival + " " + ticket.seat);
                                 soldTicket.add(ticket);
-                                System.out.flush();
+                                // System.out.flush();
                             } else {
-                                System.out.println(preTime + " " + String.valueOf(System.nanoTime() - startTime) + " "
-                                        + ThreadId.get() + " " + "TicketSoldOut" + " " + route + " " + departure + " "
-                                        + arrival);
-                                System.out.flush();
+                                // System.out.println(preTime + " " + String.valueOf(System.nanoTime() - startTime) + " "
+                                //         + ThreadId.get() + " " + "TicketSoldOut" + " " + route + " " + departure + " "
+                                //         + arrival);
+                                // System.out.flush();
                             }
                         } else
                         // inquiry ticket
@@ -101,12 +101,12 @@ public class RandomTest {
                             int arrival = departure + rand.nextInt(stationnum - departure) + 1; // arrival is always
                                                                                                 // greater than
                                                                                                 // departure
-                            long preTime = System.nanoTime() - startTime;
+                            // long preTime = System.nanoTime() - startTime;
                             int leftTicket = tds.inquiry(route, departure, arrival);
-                            long postTime = System.nanoTime() - startTime;
-                            System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " " + "RemainTicket"
-                                    + " " + leftTicket + " " + route + " " + departure + " " + arrival);
-                            System.out.flush();
+                            // long postTime = System.nanoTime() - startTime;
+                            // System.out.println(preTime + " " + postTime + " " + ThreadId.get() + " " + "RemainTicket"
+                            //         + " " + leftTicket + " " + route + " " + departure + " " + arrival);
+                            // System.out.flush();
                         }
                     }
                 }
