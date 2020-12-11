@@ -13,6 +13,7 @@
 # Package Files #
 *.jar
 !verify.jar
+!checker.jar
 *.war
 *.nar
 *.ear

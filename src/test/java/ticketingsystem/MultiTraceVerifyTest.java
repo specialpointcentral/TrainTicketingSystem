@@ -12,10 +12,10 @@ import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-@DisplayName("TraceVerifyTest")
-public class TraceVerifyTest {
+@DisplayName("MultiTraceVerifyTest")
+public class MultiTraceVerifyTest {
     private static File workDir = new File("src/main/java/ticketingsystem/");
-    private static File verifyDir = new File("src/test/java/verify/");
+    private static File verifyDir = new File("src/test/java/linerChecker/");
     private static boolean isWindows;
 
     protected int currentRepetition, totalRepetitions;
@@ -69,18 +69,16 @@ public class TraceVerifyTest {
     }
 
     @RepeatedTest(value = 10, name = "{displayName} {currentRepetition}/{totalRepetitions}")
-    void verifyTrace() throws IOException, InterruptedException {
+    void verifyMultiTrace() throws IOException, InterruptedException {
         ProcessBuilder builder = new ProcessBuilder();
         if (isWindows) {
-            builder.command("cmd.exe", "/c", "java -jar verify.jar trace");
+            builder.command("cmd.exe", "/c", "java -jar checker.jar --coach 10 --seat 10 --station 7 --no-path-info < trace");
         } else {
-            builder.command("sh", "-c", "java -jar verify.jar trace");
+            builder.command("sh", "-c", "java -jar checker.jar --coach 10 --seat 10 --station 7 --no-path-info < trace");
         }
         builder.directory(verifyDir);
         Process process = builder.start();
-        InputStream in = process.getInputStream();
-        BufferedReader read = new BufferedReader(new InputStreamReader(in));
-        assertEquals("Verification Finished", read.readLine());
+        
         int exitCode = process.waitFor();
         assertEquals(0, exitCode);
     }
