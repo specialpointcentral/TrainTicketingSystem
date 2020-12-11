@@ -103,8 +103,9 @@ final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum,
     1. `TicketingSystem.java`是规范文件，不能更改。
     2. `Trace.java`是trace生成程序，用于正确性验证，不能更改。
     3. `TicketingDS.java`是并发数据结构的实现。
-    4. `PerformanceBenchmark.java`是JMH基准测试程序。
-    5. `jmh.benchmark.PerformanceBenchmarkRunner.java`是JMH基准测试启动文件。
+    4. ... 其他的自建类。
+    5. `PerformanceBenchmark.java`是JMH基准测试程序。
+    6. `jmh.benchmark.PerformanceBenchmarkRunner.java`是JMH基准测试启动文件。
 
 - 文件夹`src/test/java`为测试文件夹。
     1. `ticketingsystem`存放基本测试单元。
@@ -120,6 +121,24 @@ final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum,
         - `checker.jar`为多线程线性化测试包。
 
 ## 使用说明
+
+### 文件目录
+
+项目文件主体在`src/main/java`下，你需要将你的文件放在`src/main/java/ticketingsystem`文件夹内，`PerformanceBenchmark.java`以及`jmh`文件夹用于基准测试不能删除。
+
+1. 保证整个项目的结构。
+2. 在`src/main/java/ticketingsystem`替换自己的实现。
+3. 如果使用非`java-11`版本，请调整`pom.xml`。更改`your java version`为自己版本。
+
+```xml
+<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>your java version</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    ...
+</properties>
+```
 
 ### 使用`maven`
 
