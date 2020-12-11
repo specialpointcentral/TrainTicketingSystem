@@ -39,3 +39,5 @@ target/
 *.ipr
 *.iml
 *.iws
+
+**/trace

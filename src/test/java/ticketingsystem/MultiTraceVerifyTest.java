@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 @DisplayName("MultiTraceVerifyTest")
@@ -49,6 +48,9 @@ public class MultiTraceVerifyTest {
         System.out.flush();
 
         generateTraceFile();
+        System.out.println(
+                String.format("[%d/%d] Trace has been generated", currentRepetition, totalRepetitions));
+        System.out.flush();
     }
 
     void generateTraceFile() throws IOException, InterruptedException {

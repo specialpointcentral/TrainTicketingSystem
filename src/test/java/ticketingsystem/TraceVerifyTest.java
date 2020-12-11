@@ -49,6 +49,9 @@ public class TraceVerifyTest {
         System.out.flush();
 
         generateTraceFile();
+        System.out.println(
+                String.format("[%d/%d] Trace has been generated", currentRepetition, totalRepetitions));
+        System.out.flush();
     }
 
     void generateTraceFile() throws IOException, InterruptedException {
