@@ -24,7 +24,7 @@ public class Train {
         remainSeats = new RemainSeatsTable(this.allSeatNum, this.stationNum);
     }
 
-    public int getAndLockSeat(final int departure, final int arrival) {
+    public final int getAndLockSeat(final int departure, final int arrival) {
         return getAndLockSeat(departure, arrival, 0);
     }
 
@@ -50,7 +50,7 @@ public class Train {
         return -1;
     }
 
-    public int getRemainSeats(final int departure, final int arrival) {
+    public final int getRemainSeats(final int departure, final int arrival) {
         return remainSeats.getRemainSeats(departure, arrival);
     }
 

@@ -2,7 +2,6 @@ package ticketingsystem;
 
 import java.util.concurrent.atomic.AtomicStampedReference;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class RemainSeatsTable {
     private int stationNum;
@@ -31,7 +30,7 @@ public class RemainSeatsTable {
         }
     }
 
-    public int getRemainSeats(final int departure, final int arrival) {
+    public final int getRemainSeats(final int departure, final int arrival) {
         int currTimestap = tag.getStamp();
         int currTag = tag.getReference();
         int remain = remainSeats[currTag][departure][arrival - departure];
@@ -103,12 +102,9 @@ public class RemainSeatsTable {
         }
     }
 
-    private boolean isOverlapping(final int departure, final int arrival, final long origin) {
+    private final boolean isOverlapping(final int departure, final int arrival, final long origin) {
         // departure and arrival not overlapping the origin data
-        for (int i = departure; i < arrival; ++i) {
-            if ((origin & (0x1 << i)) > 0)
-                return true;
-        }
-        return false;
+        int mask = ((0x01 << (arrival - departure)) - 1) << departure;
+        return ((mask & origin) > 0);
     }
 }
