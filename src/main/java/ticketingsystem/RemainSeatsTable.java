@@ -46,27 +46,20 @@ public class RemainSeatsTable {
         try {
             seatTableLock.lock();
             int currTag = 1 - tag.getReference();
+            // if origin is 0, mark we need do all task
+            boolean currIsNotClean = (origin != 0);
             // 0 1 2 3 4 5
             // Example: 2->4
             // 0-3 -> 3-5
             // departure station
-            // System.err.printf("D: %d,%d origin: %X\n", departure, arrival, origin);
             for (int i = 0; i < arrival; ++i) {
                 // arrival station
                 for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                    if (isOverlapping(i, j, origin))
+                    if (currIsNotClean && isOverlapping(i, j, origin))
                         continue;
                     remainSeats[currTag][i][j - i] = --remainSeats[1 - currTag][i][j - i];
                 }
             }
-            // for (int i = 0; i < stationNum; ++i) {
-            // for (int j = i + 1; j < stationNum; ++j) {
-            // System.err.printf("0(%d, %d)=%d\t", i, j, remainSeats[0][i][j - i]);
-            // System.err.printf("1(%d, %d)=%d\n", i, j, remainSeats[1][i][j - i]);
-            // }
-            // }
-            // System.err.println("");
-            // finish modify
             tag.set(currTag, tag.getStamp() + 1);
         } finally {
             seatTableLock.unlock();
@@ -79,22 +72,16 @@ public class RemainSeatsTable {
             while(seatTableLock.isLocked());
             seatTableLock.lock();
             int currTag = 1 - tag.getReference();
+            // if origin is 0, mark we need do all task
+            boolean currIsNotClean = (origin != 0);
             // departure station
-            // System.err.printf("I: %d,%d origin: %X\n", departure, arrival, origin);
             for (int i = 0; i < arrival; ++i) {
                 for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                    if (isOverlapping(i, j, origin))
+                    if (currIsNotClean && isOverlapping(i, j, origin))
                         continue;
                     remainSeats[currTag][i][j - i] = ++remainSeats[1 - currTag][i][j - i];
                 }
             }
-            // for (int i = 0; i < stationNum; ++i) {
-            // for (int j = i + 1; j < stationNum; ++j) {
-            // System.err.printf("0(%d, %d)=%d\t", i, j, remainSeats[0][i][j - i]);
-            // System.err.printf("1(%d, %d)=%d\n", i, j, remainSeats[1][i][j - i]);
-            // }
-            // }
-            // System.err.println("");
             // finish modify
             tag.set(currTag, tag.getStamp() + 1);
         } finally {

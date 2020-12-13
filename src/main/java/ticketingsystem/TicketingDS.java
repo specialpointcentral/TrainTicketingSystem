@@ -70,7 +70,7 @@ public class TicketingDS implements TicketingSystem {
             !ticketEquals(ticket, soldTickets.get(ticket.tid))) {
             return false;
         }
-        soldTickets.remove(ticket.tid, ticket);
+        soldTickets.remove(ticket.tid);
         Train currTrian = trains[ticket.route - 1];
         int seat = (ticket.coach - 1) * seatNum + (ticket.seat - 1);
         return currTrian.unlockSeat(seat, ticket.departure - 1, ticket.arrival - 1);
