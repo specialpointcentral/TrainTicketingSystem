@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @State(value = Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class PerformanceBenchmark {
-    @Param({ "1", "2", "4", "8", "16", "32", "64" })
+    @Param({ "1", "2", "4", "8", "16", "32", "64", "128" })
     static int nThreads;
 
     private ExecutorService pool;
