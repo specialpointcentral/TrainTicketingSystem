@@ -12,6 +12,9 @@ public class TicketingDS implements TicketingSystem {
     private AtomicLong buyTicketQueryID;
     private long hashMask;
 
+    private ThreadLocal<Long> ticketBeginID = ThreadLocal.withInitial(()->0L);
+    private ThreadLocal<Long> ticketEndID = ThreadLocal.withInitial(()->-1L);
+
     public TicketingDS(int routenum, int coachnum, int seatnum, int stationnum, int threadnum) {
         this.threadNum = threadnum;
         this.coachNum = coachnum;
@@ -39,13 +42,20 @@ public class TicketingDS implements TicketingSystem {
     public Ticket buyTicket(String passenger, int route, int departure, int arrival) {
         Ticket ticket = new Ticket();
         long threadID = Thread.currentThread().getId();
-        long queryID = buyTicketQueryID.incrementAndGet();
-        int queryCoachID = (int) ((queryID ^ threadID) & hashMask);
-        // System.err.println(queryCoachID);
+        // deliver to every train and coach
+        int queryCoachID = (int)(threadID & hashMask);
         Train currTrian = trains[route - 1];
-        int seat = currTrian.getAndLockSeat(departure - 1, arrival - 1, queryCoachID);
+        int seat = currTrian.getAndLockSeat(departure - 1, arrival - 1, queryCoachID * seatNum);
         if (seat < 0)
             return null;
+        // find a tid
+        long queryID = ticketBeginID.get();
+        if(queryID > ticketEndID.get()) {
+            queryID = buyTicketQueryID.getAndAdd(1000);
+            ticketEndID.set(queryID + 999);
+        }
+        ticketBeginID.set(queryID + 1);
+        // build a ticket
         ticket.tid = queryID;
         ticket.passenger = passenger;
         ticket.route = route;
@@ -91,4 +101,8 @@ public class TicketingDS implements TicketingSystem {
         );
     }
 
+    public void clear() {
+        ticketBeginID.remove();
+        ticketEndID.remove();
+    }
 }

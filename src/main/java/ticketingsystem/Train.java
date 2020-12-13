@@ -28,10 +28,10 @@ public class Train {
         return getAndLockSeat(departure, arrival, 0);
     }
 
-    public int getAndLockSeat(final int departure, final int arrival, final int beginCoach) {
+    public int getAndLockSeat(final int departure, final int arrival, final int beginSeats) {
         // check if has seats
         while (haveRemainSeats(departure, arrival)) {
-            int beginSeat = (beginCoach % coachNum) * seatNum;
+            int beginSeat = beginSeats % allSeatNum;
             // find the seat
             for (int i = 0; i < allSeatNum; ++i) {
                 int pos = (beginSeat + i) % allSeatNum;
