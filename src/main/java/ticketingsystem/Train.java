@@ -2,6 +2,17 @@ package ticketingsystem;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+class RefundTicket {
+    int seat;
+    int departure; 
+    int arrival;
+    public RefundTicket(final int seat, final int departure, final int arrival) {
+        this.seat = seat;
+        this.departure = departure;
+        this.arrival = arrival;
+    }
+}
+
 public class Train {
     private AtomicLong[] seats;
     private final int seatNum;
@@ -9,6 +20,9 @@ public class Train {
     private final int stationNum;
     private final int allSeatNum;
 
+    private static final int BUFSIZE = 20;
+    private ThreadLocal<RefundTicket[]> refundList = ThreadLocal.withInitial(()-> new RefundTicket[BUFSIZE]);
+    private ThreadLocal<Integer> pointer = ThreadLocal.withInitial(()-> 0);
     // map for remain seats
     RemainSeatsTable remainSeats;
 
@@ -84,5 +98,29 @@ public class Train {
 
     private final boolean haveRemainSeats(final int departure, final int arrival) {
         return remainSeats.getRemainSeats(departure, arrival) > 0;
+    }
+
+    public final void insertRefundList(final int seat, final int departure, final int arrival) {
+        int p = pointer.get();
+        refundList.get()[p] = new RefundTicket(seat, departure, arrival);
+        pointer.set((p + 1) % BUFSIZE);
+    }
+
+    public final int getFindRefund(final int departure, final int arrival) {
+        int usefulSeat = -1;
+        for(int i = 0; i < BUFSIZE; ++i) {
+            RefundTicket tick = refundList.get()[i];
+            if(tick != null && tick.departure <= departure && tick.arrival >= arrival) {
+                usefulSeat = tick.seat;
+                refundList.get()[i] = null;
+                break;
+            }
+        }
+        return usefulSeat;
+    }
+
+    public void clear() {
+        refundList.remove();
+        pointer.remove();
     }
 }

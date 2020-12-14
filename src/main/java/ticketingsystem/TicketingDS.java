@@ -24,7 +24,10 @@ public class TicketingDS implements TicketingSystem {
         for (int i = 0; i < routenum; i++) {
             trains[i] = new Train(coachnum, seatnum, stationnum);
         }
-        soldTickets = new ConcurrentHashMap<>();
+        int initialCapacity = 128;
+        float loadFactor = 0.5f;
+        int concurrencyLevel = (threadnum / 10 + 1) * 2;
+        soldTickets = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
 
         int coachBitNum = 32 - Integer.numberOfLeadingZeros(Math.max(this.coachNum - 1, 1));
         int threadNumBitNum = 32 - Integer.numberOfLeadingZeros(Math.max(this.threadNum - 1, 1));
@@ -45,14 +48,16 @@ public class TicketingDS implements TicketingSystem {
         // deliver to every train and coach
         int queryCoachID = (int)(threadID & hashMask);
         Train currTrian = trains[route - 1];
-        int seat = currTrian.getAndLockSeat(departure - 1, arrival - 1, queryCoachID * seatNum);
+        int beginSeats = currTrian.getFindRefund(departure - 1, arrival - 1);
+        if(beginSeats == -1) beginSeats = queryCoachID * seatNum;
+        int seat = currTrian.getAndLockSeat(departure - 1, arrival - 1, beginSeats);
         if (seat < 0)
             return null;
         // find a tid
         long queryID = ticketBeginID.get();
         if(queryID > ticketEndID.get()) {
-            queryID = buyTicketQueryID.getAndAdd(1000);
-            ticketEndID.set(queryID + 999);
+            queryID = buyTicketQueryID.getAndAdd(512);
+            ticketEndID.set(queryID + 511);
         }
         ticketBeginID.set(queryID + 1);
         // build a ticket
@@ -83,6 +88,7 @@ public class TicketingDS implements TicketingSystem {
         soldTickets.remove(ticket.tid);
         Train currTrian = trains[ticket.route - 1];
         int seat = (ticket.coach - 1) * seatNum + (ticket.seat - 1);
+        currTrian.insertRefundList(seat, ticket.departure - 1, ticket.arrival - 1);
         return currTrian.unlockSeat(seat, ticket.departure - 1, ticket.arrival - 1);
     }
 
