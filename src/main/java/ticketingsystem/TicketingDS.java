@@ -1,6 +1,5 @@
 package ticketingsystem;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TicketingDS implements TicketingSystem {
@@ -8,7 +7,7 @@ public class TicketingDS implements TicketingSystem {
     private Train[] trains;
     private int coachNum;
     private int seatNum;
-    private ConcurrentHashMap<Long, Ticket> soldTickets;
+    
     private AtomicLong buyTicketQueryID;
     private long hashMask;
 
@@ -24,10 +23,6 @@ public class TicketingDS implements TicketingSystem {
         for (int i = 0; i < routenum; i++) {
             trains[i] = new Train(coachnum, seatnum, stationnum);
         }
-        int initialCapacity = 128;
-        float loadFactor = 0.5f;
-        int concurrencyLevel = (threadnum / 10 + 1) * 2;
-        soldTickets = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
 
         int coachBitNum = 32 - Integer.numberOfLeadingZeros(Math.max(this.coachNum - 1, 1));
         int threadNumBitNum = 32 - Integer.numberOfLeadingZeros(Math.max(this.threadNum - 1, 1));
@@ -69,7 +64,7 @@ public class TicketingDS implements TicketingSystem {
         ticket.coach = (seat / seatNum) + 1;
         ticket.seat = (seat % seatNum) + 1;
 
-        soldTickets.put(ticket.tid, ticket);
+        currTrian.addSoldTicket(ticket);
         return ticket;
     }
 
@@ -81,30 +76,13 @@ public class TicketingDS implements TicketingSystem {
 
     @Override
     public boolean refundTicket(Ticket ticket) {
-        if (!soldTickets.containsKey(ticket.tid) || 
-            !ticketEquals(ticket, soldTickets.get(ticket.tid))) {
+        Train currTrian = trains[ticket.route - 1];
+        if(!currTrian.containAndRemove(ticket)) {
             return false;
         }
-        soldTickets.remove(ticket.tid);
-        Train currTrian = trains[ticket.route - 1];
         int seat = (ticket.coach - 1) * seatNum + (ticket.seat - 1);
         currTrian.insertRefundList(seat, ticket.departure - 1, ticket.arrival - 1);
         return currTrian.unlockSeat(seat, ticket.departure - 1, ticket.arrival - 1);
-    }
-
-    private final boolean ticketEquals(Ticket x, Ticket y) {
-        if(x == y) return true;
-        if(x == null || y == null) return false;
-        
-        return( 
-            (x.tid == y.tid)                    &&
-            (x.passenger.equals(y.passenger))   &&
-            (x.route == y.route)                &&
-            (x.coach == y.coach)                &&
-            (x.seat == y.seat)                  &&
-            (x.departure == y.departure)        &&
-            (x.arrival == y.arrival)
-        );
     }
 
     public void clear() {

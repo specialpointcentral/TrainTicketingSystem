@@ -1,6 +1,7 @@
 package ticketingsystem;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class RefundTicket {
     int seat;
@@ -14,11 +15,12 @@ class RefundTicket {
 }
 
 public class Train {
-    private AtomicLong[] seats;
+    private AtomicInteger[] seats;
     private final int seatNum;
     private final int coachNum;
     private final int stationNum;
     private final int allSeatNum;
+    private ConcurrentHashMap<Long, Ticket> soldTickets;
 
     private static final int BUFSIZE = 20;
     private ThreadLocal<RefundTicket[]> refundList = ThreadLocal.withInitial(()-> new RefundTicket[BUFSIZE]);
@@ -31,11 +33,15 @@ public class Train {
         this.allSeatNum = coachnum * seatnum;
         this.coachNum = coachnum;
         this.stationNum = stationnum;
-        this.seats = new AtomicLong[this.allSeatNum];
+        this.seats = new AtomicInteger[this.allSeatNum];
         for (int i = 0; i < this.allSeatNum; ++i) {
-            this.seats[i] = new AtomicLong(0);
+            this.seats[i] = new AtomicInteger(0);
         }
         remainSeats = new RemainSeatsTable(this.allSeatNum, this.stationNum);
+        int initialCapacity = 128;
+        float loadFactor = 0.5f;
+        int concurrencyLevel = 2;
+        soldTickets = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
     }
 
     public final int getAndLockSeat(final int departure, final int arrival) {
@@ -49,7 +55,7 @@ public class Train {
             // find the seat
             for (int i = 0; i < allSeatNum; ++i) {
                 int pos = (beginSeat + i) % allSeatNum;
-                long tmp = seats[pos].get();
+                int tmp = seats[pos].get();
                 // if seat is not occupied
                 while (!isSeatOccupied(tmp, departure, arrival)) {
                     // CAS!
@@ -70,8 +76,8 @@ public class Train {
 
     public boolean unlockSeat(final int seat, final int departure, final int arrival) {
         while (true) {
-            long tmp = seats[seat].get();
-            long cleanTmp = cleanOccupied(tmp, departure, arrival);
+            int tmp = seats[seat].get();
+            int cleanTmp = cleanOccupied(tmp, departure, arrival);
             if (seats[seat].compareAndSet(tmp, cleanTmp)) {
                 remainSeats.incrementRemainSeats(departure, arrival, cleanTmp);
                 return true;
@@ -79,20 +85,20 @@ public class Train {
         }
     }
 
-    private final boolean isSeatOccupied(final long block, final int departure, final int arrival) {
-        long occupied = ((0x01 << (arrival - departure)) - 1) << departure;
+    private final boolean isSeatOccupied(final int block, final int departure, final int arrival) {
+        int occupied = ((0x01 << (arrival - departure)) - 1) << departure;
         // 00000|0000|000000 block
         // 00000|1111|000000 occupied
         return (occupied & block) != 0;
     }
 
-    private final long setOccupied(final long block, final int departure, final int arrival) {
-        long occupied = ((0x01 << (arrival - departure)) - 1) << departure;
+    private final int setOccupied(final int block, final int departure, final int arrival) {
+        int occupied = ((0x01 << (arrival - departure)) - 1) << departure;
         return block | occupied;
     }
 
-    private final long cleanOccupied(final long block, final int departure, final int arrival) {
-        long occupied = ((0x01 << (arrival - departure)) - 1) << departure;
+    private final int cleanOccupied(final int block, final int departure, final int arrival) {
+        int occupied = ((0x01 << (arrival - departure)) - 1) << departure;
         return block & ~occupied;
     }
 
@@ -122,5 +128,33 @@ public class Train {
     public void clear() {
         refundList.remove();
         pointer.remove();
+    }
+
+    public final boolean containAndRemove(Ticket ticket) {
+        if (!soldTickets.containsKey(ticket.tid) || 
+            !ticketEquals(ticket, soldTickets.get(ticket.tid))) {
+            return false;
+        }
+        soldTickets.remove(ticket.tid);
+        return true;
+    }
+
+    public final void addSoldTicket(Ticket ticket) {
+        soldTickets.put(ticket.tid, ticket);
+    }
+
+    private final boolean ticketEquals(Ticket x, Ticket y) {
+        if(x == y) return true;
+        if(x == null || y == null) return false;
+        
+        return( 
+            (x.tid == y.tid)                    &&
+            (x.passenger.equals(y.passenger))   &&
+            (x.route == y.route)                &&
+            (x.coach == y.coach)                &&
+            (x.seat == y.seat)                  &&
+            (x.departure == y.departure)        &&
+            (x.arrival == y.arrival)
+        );
     }
 }
