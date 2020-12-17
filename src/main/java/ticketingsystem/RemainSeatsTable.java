@@ -34,10 +34,12 @@ public class RemainSeatsTable {
         int currTimestap = tag.getStamp();
         int currTag = tag.getReference();
         int remain = remainSeats[currTag][departure][arrival - departure];
-        while (!tag.compareAndSet(currTag, currTag, currTimestap, currTimestap)) {
+        int twiceTimestap = tag.getStamp();
+        while (currTimestap != twiceTimestap) {
             currTimestap = tag.getStamp();
             currTag = tag.getReference();
             remain = remainSeats[currTag][departure][arrival - departure];
+            twiceTimestap = tag.getStamp();
         }
         return remain;
     }

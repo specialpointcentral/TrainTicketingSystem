@@ -131,8 +131,8 @@ public class Train {
     }
 
     public final boolean containAndRemove(Ticket ticket) {
-        if (!soldTickets.containsKey(ticket.tid) || 
-            !ticketEquals(ticket, soldTickets.get(ticket.tid))) {
+        Ticket containTicket = soldTickets.get(ticket.tid);
+        if (containTicket == null || !ticketEquals(ticket, containTicket)) {
             return false;
         }
         soldTickets.remove(ticket.tid);
