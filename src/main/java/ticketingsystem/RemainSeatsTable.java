@@ -53,11 +53,22 @@ public class RemainSeatsTable {
             // 0-3 -> 3-5
             // departure station
             for (int i = 0; i < arrival; ++i) {
+                // copy
+                for(int j = i + 1; j < stationNum; ++j) {
+                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
+                }
                 // arrival station
                 for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
                     if (currIsNotClean && isOverlapping(i, j, origin))
-                        continue;
-                    remainSeats[currTag][i][j - i] = --remainSeats[1 - currTag][i][j - i];
+                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
+                    else
+                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] - 1;
+                }
+            }
+            // copy
+            for (int i = arrival; i < stationNum; ++i) {
+                for(int j = i + 1; j < stationNum; ++j) {
+                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
                 }
             }
             tag.set(currTag, tag.getStamp() + 1);
@@ -76,10 +87,21 @@ public class RemainSeatsTable {
             boolean currIsNotClean = (origin != 0);
             // departure station
             for (int i = 0; i < arrival; ++i) {
+                // copy
+                for(int j = i + 1; j < stationNum; ++j) {
+                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
+                }
                 for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
                     if (currIsNotClean && isOverlapping(i, j, origin))
-                        continue;
-                    remainSeats[currTag][i][j - i] = ++remainSeats[1 - currTag][i][j - i];
+                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
+                    else
+                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] + 1;
+                }
+            }
+            // copy
+            for (int i = arrival; i < stationNum; ++i) {
+                for(int j = i + 1; j < stationNum; ++j) {
+                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
                 }
             }
             // finish modify
