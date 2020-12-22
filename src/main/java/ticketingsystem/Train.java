@@ -128,6 +128,7 @@ public class Train {
     public void clear() {
         refundList.remove();
         pointer.remove();
+        remainSeats.clear();
     }
 
     public final boolean containAndRemove(Ticket ticket) {

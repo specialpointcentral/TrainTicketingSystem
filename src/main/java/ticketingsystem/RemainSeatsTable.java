@@ -1,53 +1,83 @@
 package ticketingsystem;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicStampedReference;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class RemainSeatsTable {
     private int stationNum;
-    private int[][][] remainSeats;
-    private AtomicStampedReference<Integer> tag;
+    private int seatNum;
+    private AtomicStampedReference<int[][]> remainSeats;
 
-    private ReentrantLock seatTableLock = new ReentrantLock();
+    private ThreadLocal<int[][]> localTable;
+    private ThreadLocal<int[][]> localTableSwither;
+
+    Backoffer backoff = new Backoffer();
 
     public RemainSeatsTable(final int seatnum, final int stationnum) {
         this.stationNum = stationnum;
-        this.tag = new AtomicStampedReference<>(0, 0);
-        this.remainSeats = new int[2][][];
-        for (int tags = 0; tags < 2; ++tags) {
-            this.remainSeats[tags] = new int[stationnum][];
-            for (int i = 0; i < stationnum; ++i) {
-                // remainSeats[from][to]
+        this.seatNum = seatnum;
+
+        this.localTable = ThreadLocal.withInitial(() -> {
+            int[][] remainSeat = new int[stationNum][];
+            for (int i = 0; i < stationNum; ++i) {
+                // remainSeat[from][to]
                 // NOTE: 'from' is real, but 'to' is (to+from)
                 // if 'to' is 0, result is always 0
-                // Example: remainSeats[1][2] = (1)->(3)
-                this.remainSeats[tags][i] = new int[stationnum - i];
-                this.remainSeats[tags][i][0] = 0;
-                for (int j = 1; j < stationnum - i; ++j) {
-                    remainSeats[tags][i][j] = seatnum;
+                // Example: remainSeat[1][2] = (1)->(3)
+                remainSeat[i] = new int[stationNum - i];
+                remainSeat[i][0] = 0;
+                for (int j = 1; j < stationNum - i; ++j) {
+                    remainSeat[i][j] = seatNum;
                 }
             }
-        }
+            return remainSeat;
+        });
+
+        this.localTableSwither = ThreadLocal.withInitial(() -> {
+            int[][] remainSeat = new int[stationNum][];
+            for (int i = 0; i < stationNum; ++i) {
+                // remainSeat[from][to]
+                // NOTE: 'from' is real, but 'to' is (to+from)
+                // if 'to' is 0, result is always 0
+                // Example: remainSeat[1][2] = (1)->(3)
+                remainSeat[i] = new int[stationNum - i];
+                remainSeat[i][0] = 0;
+                for (int j = 1; j < stationNum - i; ++j) {
+                    remainSeat[i][j] = seatNum;
+                }
+            }
+            return remainSeat;
+        });
+
+        this.remainSeats = new AtomicStampedReference<>(localTable.get(), 0);
     }
 
     public final int getRemainSeats(final int departure, final int arrival) {
-        int currTimestap = tag.getStamp();
-        int currTag = tag.getReference();
-        int remain = remainSeats[currTag][departure][arrival - departure];
-        int twiceTimestap = tag.getStamp();
+        int currTimestap = remainSeats.getStamp();
+        int[][] currTable = remainSeats.getReference();
+        int remain = currTable[departure][arrival - departure];
+        int twiceTimestap = remainSeats.getStamp();
         while (currTimestap != twiceTimestap) {
-            currTimestap = tag.getStamp();
-            currTag = tag.getReference();
-            remain = remainSeats[currTag][departure][arrival - departure];
-            twiceTimestap = tag.getStamp();
+            currTimestap = remainSeats.getStamp();
+            currTable = remainSeats.getReference();
+            remain = currTable[departure][arrival - departure];
+            twiceTimestap = remainSeats.getStamp();
         }
         return remain;
     }
 
-    public void decrementRemainSeats(final int departure, final int arrival, final long origin) {
-        try {
-            seatTableLock.lock();
-            int currTag = 1 - tag.getReference();
+    public final void setRemainSeats(final int departure, final int arrival, final long origin, final int num) {
+        while (true) {
+            int[][] oldTable = remainSeats.getReference();
+            int[][] newTable = localTable.get();
+            if (Arrays.equals(oldTable, newTable)) {
+                // using my local table as global table,
+                // so we need create a new one to modify
+                newTable = localTableSwither.get();
+            }
+            int stamp = remainSeats.getStamp();
+            // decrease/increase the table
+
             // if origin is 0, mark we need do all task
             boolean currIsNotClean = (origin != 0);
             // 0 1 2 3 4 5
@@ -56,66 +86,48 @@ public class RemainSeatsTable {
             // departure station
             for (int i = 0; i < arrival; ++i) {
                 // copy
-                for(int j = i + 1; j < stationNum; ++j) {
-                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
+                for (int j = i + 1; j < stationNum; ++j) {
+                    newTable[i][j - i] = oldTable[i][j - i];
                 }
                 // arrival station
                 for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                    if (currIsNotClean && isOverlapping(i, j, origin))
-                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
-                    else
-                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] - 1;
+                    if (currIsNotClean && isOverlapping(i, j, origin)) {
+                        newTable[i][j - i] = oldTable[i][j - i];
+                    } else {
+                        newTable[i][j - i] = oldTable[i][j - i] + num;
+                    }
                 }
             }
             // copy
             for (int i = arrival; i < stationNum; ++i) {
-                for(int j = i + 1; j < stationNum; ++j) {
-                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
+                for (int j = i + 1; j < stationNum; ++j) {
+                    newTable[i][j - i] = oldTable[i][j - i];
                 }
             }
-            tag.set(currTag, tag.getStamp() + 1);
-        } finally {
-            seatTableLock.unlock();
-        }
 
+            if (remainSeats.compareAndSet(oldTable, newTable, stamp, stamp + 1)) {
+                return;
+            }
+            backoff.backoff();
+        }
+    }
+
+    public void decrementRemainSeats(final int departure, final int arrival, final long origin) {
+        setRemainSeats(departure, arrival, origin, -1);
     }
 
     public void incrementRemainSeats(final int departure, final int arrival, final long origin) {
-        try {
-            while(seatTableLock.isLocked());
-            seatTableLock.lock();
-            int currTag = 1 - tag.getReference();
-            // if origin is 0, mark we need do all task
-            boolean currIsNotClean = (origin != 0);
-            // departure station
-            for (int i = 0; i < arrival; ++i) {
-                // copy
-                for(int j = i + 1; j < stationNum; ++j) {
-                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
-                }
-                for (int j = Math.max(departure, i) + 1; j < stationNum; ++j) {
-                    if (currIsNotClean && isOverlapping(i, j, origin))
-                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
-                    else
-                        remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i] + 1;
-                }
-            }
-            // copy
-            for (int i = arrival; i < stationNum; ++i) {
-                for(int j = i + 1; j < stationNum; ++j) {
-                    remainSeats[currTag][i][j - i] = remainSeats[1 - currTag][i][j - i];
-                }
-            }
-            // finish modify
-            tag.set(currTag, tag.getStamp() + 1);
-        } finally {
-            seatTableLock.unlock();
-        }
+        setRemainSeats(departure, arrival, origin, 1);
     }
 
     private final boolean isOverlapping(final int departure, final int arrival, final long origin) {
         // departure and arrival not overlapping the origin data
         int mask = ((0x01 << (arrival - departure)) - 1) << departure;
         return ((mask & origin) > 0);
+    }
+
+    public void clear() {
+        localTable.remove();
+        localTableSwither.remove();
     }
 }

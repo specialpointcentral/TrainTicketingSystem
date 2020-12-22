@@ -7,6 +7,7 @@ public class TicketingDS implements TicketingSystem {
     private Train[] trains;
     private int coachNum;
     private int seatNum;
+    private int routeNum;
     
     private AtomicLong buyTicketQueryID;
     private long hashMask;
@@ -18,6 +19,7 @@ public class TicketingDS implements TicketingSystem {
         this.threadNum = threadnum;
         this.coachNum = coachnum;
         this.seatNum = seatnum;
+        this.routeNum = routenum;
         trains = new Train[routenum];
         buyTicketQueryID = new AtomicLong(0);
         for (int i = 0; i < routenum; i++) {
@@ -88,5 +90,8 @@ public class TicketingDS implements TicketingSystem {
     public void clear() {
         ticketBeginID.remove();
         ticketEndID.remove();
+        for (int i = 0; i < routeNum; i++) {
+            trains[i].clear();
+        }
     }
 }
