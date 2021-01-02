@@ -2,12 +2,15 @@ package ticketingsystem;
 
 import org.openjdk.jmh.annotations.*;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 @BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 5, time = 1)
@@ -34,10 +37,30 @@ public class PerformanceBenchmark {
     TicketingDS tds;
     ArrayList<Callable<Object>> list;
 
+    static ThreadLocalRandom rand = ThreadLocalRandom.current();
+
+    // perform record
+    class PerformRecord {
+        int buySuccessTimes;
+        int buyFailTimes;
+        int refundTimes;
+        int inqueryTimes;
+    }
+
+    ThreadLocal<PerformRecord> perform = ThreadLocal.withInitial(() -> new PerformRecord());
+    List<PerformRecord> singlePerform = Collections.synchronizedList(new ArrayList<PerformRecord>());
+    ArrayList<PerformRecord> performList = new ArrayList<>();
+
+    Logger logger = Logger.getLogger("PerformLog");
+
     static String passengerName() {
-        Random rand = new Random();
         long uid = rand.nextLong();
         return "passenger" + uid;
+    }
+
+    @Setup(Level.Trial)
+    public void initPerform() {
+        performList.clear();
     }
 
     @Setup(Level.Iteration)
@@ -45,10 +68,17 @@ public class PerformanceBenchmark {
         this.pool = Executors.newFixedThreadPool(nThreads);
         tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, nThreads);
         list = new ArrayList<>();
+        singlePerform.clear();
         for (int i = 0; i < nThreads; i++) {
             list.add(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
+                    singlePerform.add(perform.get());
+                    perform.get().buySuccessTimes = 0;
+                    perform.get().buyFailTimes = 0;
+                    perform.get().refundTimes = 0;
+                    perform.get().inqueryTimes = 0;
+
                     singleTrace();
                     return null;
                 }
@@ -64,18 +94,43 @@ public class PerformanceBenchmark {
 
     @TearDown(Level.Iteration)
     public void finish() {
+        performCalc();
         pool.shutdown();
     }
 
+    public void performCalc() {
+        PerformRecord p = new PerformRecord();
+        for (int i = 0; i < singlePerform.size(); ++i) {
+            p.buySuccessTimes += singlePerform.get(i).buySuccessTimes;
+            p.buyFailTimes += singlePerform.get(i).buyFailTimes;
+            p.refundTimes += singlePerform.get(i).refundTimes;
+            p.inqueryTimes += singlePerform.get(i).inqueryTimes;
+        }
+        performList.add(p);
+    }
+
+    @TearDown(Level.Trial)
+    public void performRes() {
+        for (int i = 0; i < performList.size(); ++i) {
+            PerformRecord p = performList.get(i);
+            int all = p.inqueryTimes + p.refundTimes + p.buySuccessTimes + p.buyFailTimes;
+            logger.info(String.format(
+                    "[Turn: %02d] Inquery: %08d(%s%%), Refund: %08d(%s%%), BuySuccess: %08d(%s%%), BuyFailed: %08d(%s%%) %n",
+                    i + 1, p.inqueryTimes, new DecimalFormat("0.00").format(p.inqueryTimes * 100.0 / all),
+                    p.refundTimes, new DecimalFormat("0.00").format(p.refundTimes * 100.0 / all), p.buySuccessTimes,
+                    new DecimalFormat("0.00").format(p.buySuccessTimes * 100.0 / all), p.buyFailTimes,
+                    new DecimalFormat("0.00").format(p.buyFailTimes * 100.0 / all)));
+        }
+    }
+
     private final void singleTrace() {
-        Random rand = new Random();
         Ticket ticket = null;
         ArrayList<Ticket> soldTicket = new ArrayList<Ticket>();
 
         for (int i = 0; i < testnum / nThreads; i++) {
             int sel = rand.nextInt(inqpc);
             // return ticket
-            if (0 <= sel && sel < retpc && soldTicket.size() > 0) {
+            if (0 <= sel && sel < retpc && !soldTicket.isEmpty()) {
                 int select = rand.nextInt(soldTicket.size());
                 if ((ticket = soldTicket.remove(select)) != null) {
                     if (!tds.refundTicket(ticket)) {
@@ -86,6 +141,7 @@ public class PerformanceBenchmark {
                     System.out.println("ErrOfRefund");
                     System.out.flush();
                 }
+                perform.get().refundTimes++;
             } else
             // buy ticket
             if (retpc <= sel && sel < buypc) {
@@ -97,6 +153,9 @@ public class PerformanceBenchmark {
                                                                                     // departure
                 if ((ticket = tds.buyTicket(passenger, route, departure, arrival)) != null) {
                     soldTicket.add(ticket);
+                    perform.get().buySuccessTimes++;
+                } else {
+                    perform.get().buyFailTimes++;
                 }
             } else
             // inquiry ticket
@@ -108,6 +167,8 @@ public class PerformanceBenchmark {
                                                                                     // greater than
                                                                                     // departure
                 int leftTicket = tds.inquiry(route, departure, arrival);
+
+                perform.get().inqueryTimes++;
             }
         }
     }
