@@ -50,7 +50,7 @@ public class Train {
 
     public int getAndLockSeat(final int departure, final int arrival, final int beginSeats) {
         // check if has seats
-        while (haveRemainSeats(departure, arrival)) {
+        if (haveRemainSeats(departure, arrival)) {
             int beginSeat = beginSeats % allSeatNum;
             // find the seat
             for (int i = 0; i < allSeatNum; ++i) {
@@ -136,8 +136,7 @@ public class Train {
         if (containTicket == null || !ticketEquals(ticket, containTicket)) {
             return false;
         }
-        soldTickets.remove(ticket.tid);
-        return true;
+        return soldTickets.remove(ticket.tid, containTicket);
     }
 
     public final void addSoldTicket(Ticket ticket) {

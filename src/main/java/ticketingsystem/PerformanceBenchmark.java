@@ -73,13 +73,14 @@ public class PerformanceBenchmark {
             list.add(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
-                    singlePerform.add(perform.get());
                     perform.get().buySuccessTimes = 0;
                     perform.get().buyFailTimes = 0;
                     perform.get().refundTimes = 0;
                     perform.get().inqueryTimes = 0;
 
                     singleTrace();
+                    
+                    singlePerform.add(perform.get());
                     return null;
                 }
             });
